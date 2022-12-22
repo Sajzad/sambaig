@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Campaigns {% endblock %}
+
+{% block content %}
+<div id="user-modal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+    <!-- Modal content-->
+	    <div class="modal-content">
+	      	<div class="modal-header">
+	        	<h4 class="modal-title">Create User</h4>
+	        	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	      	</div>
+	        <form method="post">
+            	{% csrf_token %}
+		      	<div class="modal-body">
+
+		            <div class="input-group">
+		                <span class="input-group-addon pr-3"><i class="far fa-user fa-2x"></i></span>
+		                <input id="email" type="text" class="form-control" name="user" placeholder="Enter Username">
+		            </div>
+		            <div class="input-group pt-3">
+		                <span class="input-group-addon pr-3"><i class="fas fa-unlock-alt fa-2x"></i></span>
+		                <input id="password" type="password" class="form-control" name="password" placeholder="Password">
+		            </div>
+				    {% if request.user.is_superuser %}
+				    	<label class="checkbox-inline text-secondary mt-3">
+				      		<input type="checkbox" class="mx-2" value="yes" name="admin">Admin
+				    	</label>
+				    {% endif %}
+		      	</div>
+			    <div class="modal-footer">
+			    	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			        <button name="check" value="create-user" type="submit" class="btn btn-default">Create</button>
+			    </div>
+			</form>
+	    </div>
+  </div>
+</div>
+<!-- manage users model -->
+<div id="manage-user-modal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+	    <div class="modal-content p-4">
+	      	<div class="modal-header">
+	        	<h5 class="modal-title">Manage User</h5>
+	        	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	      	</div>
+	        <form method="post">
+            	{% csrf_token %}
+		      	<div class="modal-body">
+					<div class="form-group">
+						<label>Username *</label>
+                        <select class="form-control" name='admin_id' data-size='6' class="selectpicker"  data-actions-box="true" data-live-search="true" name="form_ids" required>
+                            {% for item in admins %}
+                                <option class="text-secondary" value="{{ item.id }}">{{ item.admin.username}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                    	<label>List *</label>
+                        <select class="form-control" multiple name='contact_id' data-size='6' class="selectpicker" data-actions-box="true" data-live-search="true" name="form_ids" required>
+                            {% for item in contacts %}
+                                <option class="text-secondary" value="{{ item.id }}">{{ item.form_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <!-- <div class="form-group">
+                    	<label>Number</label>
+                    	<select title="Select Number *" class="form-control" name='ani_id' data-size='6' class="selectpicker"  data-actions-box="true" data-live-search="true" name="form_ids" required>
+                            {% for item in anis %}
+                                <option 
+                                	class = "text-secondary" 
+                                	data-content="<span>{{item.ani}}</span>  <span class='badge badge-danger ml-2'>{{item.admin}}</span>"
+                                	value="{{ item.id }}">
+                                	{{ item.ani}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>		 -->            
+		      	</div>
+			    <div class="modal-footer">
+			    	<button type="button" class="btn btn-sm btn-danger" data-dismiss="modal">Close</button>
+			        <button name="check" value="manage-user" type="submit" class="btn btn-sm btn-default">Submit</button>
+			    </div>
+			</form>
+	    </div>
+  </div>
+</div>
+
+{% if request.user.is_superuser %}
+<div class="content-wrapper" id="app">
+	<section class="content">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-2">
+					<div>
+						{% include 'base/ad-partial.html' %}
+					</div>						
+				</div>
+				{% if is_pass_saved %}
+					<div class="col-md-10 pt-3">
+						<div class="row">
+							<div class="col-md-12 mt-2">
+								<div class="card shadow"> 
+									<div class="card-body">
+										<form method="POST">
+										{% csrf_token %}
+											<div class="row">
+												<div class="col-md-5">
+													<div class="form-group">
+										    			<input type="text" name="username" class="form-control" placeholder="Enter Username">
+										  			</div>
+												</div>
+												<div class="col-md-2">
+													<button type="submit" name="check" value="search-users" class="btn btn-default mx-auto"><i class="fas fa-search"></i></button>	
+												</div>
+												<div class="col-md-5">
+													{% if request.user.is_superuser %}
+														<p class="text-bold">Access to Admin Panel</p>
+														<a href="/way_to_superadmin/base/notification/" class="badge badge-danger">user</a>
+														<a href="/way_to_superadmin/sites/site/" class="badge badge-secondary">site</a>
+													{% endif %}
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-12 mt-2">
+								<div class="card table-responsive shadow">
+									<div class="card-header">
+										<div class="row">
+											<div class="col-md-2">
+												<p class="h5 font-weight-bold sweet-text">Manage Users</p>
+											</div>
+											<div class="col-md-10">
+												<div class="d-flex flex-row-reverse">
+													<button data-toggle='modal' data-target='#user-modal' type="button" class="btn-sm btn btn-secondary bold-1">+ create User</button>
+
+													<button data-toggle='modal' data-target='#manage-user-modal' type="button" class="btn-sm btn btn-secondary mr-2 bold-1">Assign List</button>
+												</div>
+											</div>
+										</div>
+									</div>
+									<form method="POST">
+									{% csrf_token %}
+										<div class="card-body">
+											<div class="pb-1">
+												{% if request.user.is_superuser %}
+													<button class="btn btn-warning btn-sm bold-1" name="check" value="super">Admin</button>
+												{% endif %}
+												<button class="btn btn-warning btn-sm bold-1" name="check" value="user">User</button>
+												<button class="btn btn-danger btn-sm float-right" name="check" value="remove">Remove</button>
+											</div>
+											<div style="max-height: 400px!important; overflow-y:scroll;">
+												<table class="table" id="select_all_boxes">
+													<thead>
+														<tr>
+															<th>
+																<div class="form-check">
+				                                                    <input class="form-check-input" type="checkbox" id="select-all">
+				                                                    <label class="form-check-label ml-1">All</label>
+				                                                </div>
+															</th>
+															<th>User</th>
+															<!-- <th>Action</th> -->
+															<th>Number</th>
+															<th>List</th>
+															<th>Type</th>
+															<th>Action</th>
+														</tr>
+													</thead>
+													<tbody class="bold-1">
+													{% for item in admins %}
+														<tr>
+															<td>
+				                                                <div class="form-check">
+				                                                    <input name="username" value="{{ item.admin.username }}" type="checkbox" class="form-check-input">
+				                                                </div> 
+															</td>
+															<td>{{ item.admin.username }}</td>
+															<td>
+															{% for ani in item.anis %}
+																<p>{{ani.ani}}</p>
+															{%endfor%}
+															</td>
+															<td>
+															{% for contact in item.contacts %}
+																<p class="badge badge-secondary px-2">{{contact.contact.form_name}}
+																<i 
+																	@click='removeForm({{contact.id}})' 
+																	class="ml-2 fas fa-times pointer"></i>
+																</p>
+															{%endfor%}
+															</td>
+															<td class="text-primary">
+															{% if item.admin.is_superuser%}
+																<p class="badge badge-success">admin</p>
+															{% else %}
+																<p class="font-weight-bold">user</p>
+															{% endif %}
+															</td>
+															<td>
+															{% if item.contacts %}	
+																<a href="edit/{{item.id}}">
+																<i class="fal fa-pen text-primary pointer"></i>
+															{% endif %}
+															</td>
+														</tr>
+													{% endfor %}
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</form>
+									{% if form_error %}
+										<div class="card-footer bg-success">
+											<p class="text-primary text-white text-center">{{ form_error }}</p>
+										</div>
+									{% else %}									
+										<div class="card-footer">
+											<p class="text-primary text-center">Search user to show</p>
+										</div>
+									{% endif %}
+								</div>
+							</div>
+						</div>
+					</div class='col-md-6'>
+				{% else %}
+					<div class="col-md-7 pt-4">
+						<div class="card shadow-lg">
+							<div class="card-header">
+								<p class="h3">Admin User and Password</p>
+							</div>
+							<div class="card-body">
+								<form method="POST">
+								{% csrf_token %}
+								  	<div class="form-group">
+								    	<label for="email">User Name *</label>
+								    	<input type="text" name="user" class="form-control" id="email">
+								  	</div>
+								  	<div class="form-group">
+								    	<label for="pwd">Password *</label>
+								    	<input type="password" name="password" class="form-control" id="pwd">
+								  	</div>
+								  	<div class="float-right">
+										<button name="check" value="user_password" type="submit" class="btn-hover color-8">Submit</button>
+								  	</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				{% endif %}
+			</div>
+		</div>
+	</section>	
+</div>
+{% endif %}
+{% endblock %}
+{% block extra_js %}
+<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> -->
+<script type="text/javascript" src="{% static 'vue/admin.js' %}"></script>
+
+<script>
+	$(function () {
+    $('select').selectpicker();
+});
+</script>
+<!-- <script>
+    {% if alert %}
+        const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'success',
+                title: '{{ alert }}'
+
+            })
+    {% elif error %}
+        const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'error',
+                title: 'OOps! {{ error }}'
+
+            })
+    {% endif %}
+
+</script> -->
+<script>
+	$('#select-all').click(function() {
+
+	  var _this = this;
+	  $('#select_all_boxes').find('input[name="username"').each(function() {
+	   
+	    if ($(_this).is(':checked')) {
+	      $(this).prop('checked', true);
+	    } else {
+	      $(this).prop('checked', false);
+	    }
+	  });
+	});$
+</script>
+{% endblock %}

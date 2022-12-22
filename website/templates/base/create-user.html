@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %} Create User {% endblock %}
+
+{% block content %}
+{% if request.user.is_superuser %}
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="container-fluid">
+                {% include 'base/ad-partial.html' %}
+            </div>
+            <div class="row px-lg-4 py-4">
+                <div class="col-lg-6">
+                    <div class="card shadow p-5">
+                        <div class="card-body">
+                            <form method="post">
+                            {% csrf_token %}
+                                <div class="input-group">
+                                    <span class="input-group-addon pr-3"><i class="far fa-user fa-2x"></i></span>
+                                    <input id="email" type="text" class="form-control" name="user" placeholder="Enter Username">
+                                </div>
+                                <div class="input-group pt-3">
+                                    <span class="input-group-addon pr-3"><i class="fas fa-unlock-alt fa-2x"></i></span>
+                                    <input id="password" type="password" class="form-control" name="password" placeholder="Password">
+                                </div>
+                                <button class="btn btn-primary mt-3 float-right" name="check" value="create-user">Submit</button>
+                            </form>    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+{% endif %}
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+        {% if alert %}
+            const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: '{{ alert }}!!'
+
+                })
+        {% elif error %}
+            const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'error',
+                    title: 'OOps! {{ error }} ??'
+
+                })
+        {% endif %}
+
+    </script>
+{% endblock %}
+{% endblock %}

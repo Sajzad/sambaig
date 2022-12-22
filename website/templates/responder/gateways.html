@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+{% block title %}SMS Gateways{% endblock %}
+
+{% block content %}
+	<div class="">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-3">
+                        <!-- <div class="shadow p-3 mb-4 card shadow p-3 animate__animated animate__fadeInBottomLeft">
+                            <p class="h2 pl-2 scale"> 
+                            	<i class="fas fa-dungeon mr-2 text-primary"></i><span class="pl-3 text-secondary font-weight-bold" style="letter-spacing:2px!important">Gateways</span>
+                            </p>
+                        </div> -->
+                </div>
+                <div class="col-sm-9">
+                    <ol class="breadcrumb float-sm-right bold-2">
+                        <li class="breadcrumb-item"><i class="far fa-home pr-2 text-white"></i><a href="#">Home</a></li>
+                        <li class="breadcrumb-item text-success font-weight-bold">Gateways </li>
+                    </ol>
+                </div>
+            </div>
+            <div class="row py-lg-5 py-2">
+                <!-- <div class="col-md-6 mx-auto p-5 card shadow"> -->
+                <div class="col-md-5 col-sm-12">
+                    <div class="card p-3 px-lg-5 py-lg-4 shadow-1">
+                        <h3 class="font-weight-bold sweet-text text-center letter-spacing pb-2 border-bottom">Add Gateways</h3>
+                        <div class="card-body">
+                            <form method="POST">
+                                {% csrf_token %}
+                                	<div class="form-group">
+	                                    <label for="usr">Name:</label>
+	                                     <input type="text" class="form-control" name="name" required>
+	                                </div> 
+                                    <div class="form-group">
+                                        <label for="gateways">Select Gateway *</label>
+                                        <select data-size='6' data-live-search="true" class="form-control" id="gateways" name="gateway" required>
+                                        	<option selected>Select</option>
+	                                        <option class="text-primary" value="Telnyx">Telnyx</option>
+	                                        <option class="text-primary" value="Twilio">Twilio</option>
+	                                        <option class="text-primary" value="Bandwidth">Bandwidth</option>
+	                                        <option class="text-primary" value="Pineapple SMS">Pineapple SMS</option>
+	                                        <option class="text-primary" value="Vonage">Vonage</option>
+	                                        <option class="text-primary" value="Signalwire">SignalWire</option>
+	                                        <option class="text-primary" value="Plivo">Plivo</option>
+	                                        <option class="text-primary" value="Messagebird">Message Bird</option>
+                                        </select>
+                                    </div> 
+                                    <div id="pineapple" style="display: none;">
+                                    	<div class="form-group">
+	                                        <label for="usr">User:</label>
+	                                        <input type="text" class="form-control" id="usr" name="user">
+	                                    </div>                        
+	                                    <div class="form-group">
+	                                        <label for="usr">Password:</label>
+	                                        <input type="text" class="form-control" id="usr" name="password">
+	                                    </div>
+	                                    <div class="text-center pt-2">
+                                    		<button type="submit" class="btn-hover color-11" name="check" value="pineapple">Submit</button>
+                                    	</div>
+                                    </div>             
+                                    <div id="twilio" style="display: none;">
+                                    	<div class="form-group">
+	                                        <label for="usr">SID:</label>
+	                                        <input type="text" class="form-control" id="usr" name="sid">
+	                                    </div>                       
+	                                    <div class="form-group">
+	                                        <label for="usr">TOKEN:</label>
+	                                        <input type="text" class="form-control" id="usr" name="token">
+	                                    </div>
+	                                    <div class="text-center pt-2">
+                                    		<button type="submit" class="btn-hover color-11" name="check" value="twilio">Submit</button>
+                                    	</div>
+                                    </div>
+                                    <div id="telnyx" style="display: none;">
+	                                    <div class="form-group">
+	                                        <label for="usr">API KEY:</label>
+	                                        <input type="text" class="form-control" id="usr" name="api_key">
+	                                    </div>
+	                                    <div class="text-center pt-2">
+                                    		<button type="submit" class="btn-hover color-11" name="check" value="telnyx">Submit</button>
+                                    	</div>
+                                    </div>      
+                                    <div id="vonage" style="display: none;">
+	                                    <div class="form-group">
+	                                        <label for="usr">API KEY:</label>
+	                                        <input type="text" class="form-control" id="usr" name="vonage_api_key">
+	                                    </div>
+	                                    <div class="form-group">
+	                                        <label for="usr">API Secret:</label>
+	                                        <input type="text" class="form-control" id="usr" name="vonage_secret_key">
+	                                    </div>
+                                        <div class="text-center pt-4">
+                                    	    <button type="submit" class="btn-hover color-11" name="check" value="vonage">Submit</button>
+                                        </div>
+                                    </div>        
+                                    <div id="bandwidth" style="display: none;">
+	                                    <div class="form-group">
+	                                        <label for="usr">API KEY:</label>
+	                                        <input type="text" class="form-control" id="usr" name="band_api_key">
+	                                    </div>
+	                                    <div class="form-group">
+	                                        <label for="usr">API Secret:</label>
+	                                        <input type="text" class="form-control" id="usr" name="band_secret_key">
+	                                    </div>
+                                        <div class="text-center pt-4">
+                                    	    <button type="submit" class="btn-hover color-11" name="check" value="vonage">Submit</button>
+                                        </div>
+                                    </div>         
+                                    <div id="signalwire" style="display: none;">
+	                                    <div class="form-group">
+	                                        <label for="usr">Space URl:</label>
+	                                        <input type="text" class="form-control" id="usr" name="signal_space_url">
+	                                    </div>
+	                                    <div class="form-group">
+	                                        <label for="usr">API Token:</label>
+	                                        <input type="text" class="form-control" id="usr" name="signal_api_token">
+	                                    </div>
+	                                    <div class="form-group">
+	                                        <label for="usr">Project ID:</label>
+	                                        <input type="text" class="form-control" id="usr" name="signal_project_id">
+	                                    </div>
+                                        <div class="text-center pt-4">
+                                    	    <button type="submit" class="btn-hover color-11" name="check" value="signalwire">Submit</button>
+                                        </div>
+                                    </div>               
+                                    <div id="plivo" style="display: none;">
+	                                    <div class="form-group">
+	                                        <label for="usr">Auth Token:</label>
+	                                        <input type="text" class="form-control" id="usr" name="plivo_token">
+	                                    </div>
+	                                    <div class="form-group">
+	                                        <label for="usr">Auth ID:</label>
+	                                        <input type="text" class="form-control" id="usr" name="plivo_id">
+	                                    </div>
+                                        <div class="text-center pt-4">
+                                    	    <button type="submit" class="btn-hover color-11" name="check" value="plivo">Submit</button>
+                                        </div>
+                                    </div>          
+                                    <div id="messagebird" style="display: none;">
+	                                    <div class="form-group">
+	                                        <label for="usr">Access Key:</label>
+	                                        <input type="text" class="form-control" id="usr" name="message_access_key">
+	                                    </div>
+                                        <div class="text-center pt-4">
+                                    	    <button type="submit" class="btn-hover color-11" name="check" value="messagebird">Submit</button>
+                                        </div>
+                                    </div>                        
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7 col-sm-12">
+                    <div class="card px-4 py-4 shadow-1">
+                        <h3 class="sweet-text pb-3 font-weight-bold letter-spacing">Gateways</h3>
+                		<div style="max-height:350px!important;">
+	                        <table class="table table-hover">
+	                            <thead>
+	                                <tr>
+	                                    <th>User</th>
+	                                    <th>Name</th>
+	                                    <th>Status</th>
+	                                    <th>Action</th>
+	                                </tr>
+	                            </thead>
+	                            <tbody class="">
+	                            {% for item in gateways %}
+	                                <tr>
+	                                    <td> {{ item.admin }} </td>
+	                                    <td> {{ item.name }} </td>
+	                                    <td>
+	                                    	<span class="badge badge-success">active</span>
+	                                    </td>
+	                                    <td class="row">
+	                                        <form method="POST">
+	                                            {% csrf_token %}
+	                                            <input type="hidden" name="gat_id" value="{{ item.id }}">
+	                                            <input type="hidden" name="gateway" value="{{ item.gateway }}">
+	                                            <input type="hidden" name="cam_id" value="{{ item.campaign_id }}">
+	                                            <button class="btn btn-danger btn-sm mx-1" value="delete" name="check">
+	                                                Delete
+	                                            </button>
+	                                        </form>
+	                                        <a 
+	                                        	href="/gateway/{{item.id}}" 
+	                                        	class="btn btn-success btn-sm">edit</a>
+	                                    </td>
+	                                </tr>
+	                            {% endfor %}
+	                            {% for item in pineapples %}
+	                                <tr>
+	                                    <td> {{ item.gateway }} </td>
+	                                    <td> {{ item.admin }} </td>
+	                                    <td> {{ item.campaign }} </td>
+	                                    <td class="row">
+	                                        <form method="POST">
+	                                            {% csrf_token %}
+	                                            <input type="hidden" name="gat_id" value="{{ item.id }}">
+	                                            <button class="btn btn-danger btn-sm mx-1" value="p-delete" name="check">
+	                                                <!-- <i class="fas fa-trash"></i> -->
+	                                                Delete
+	                                            </button>
+	                                        </form>
+	                                    </td>
+	                                </tr>
+	                            {% endfor %}
+	                            </tbody>
+	                        </table>
+	                    </div>
+                    </div>
+                </div>
+            </div>
+			<div class="row">
+            	<div class="col-lg-12">
+            		<div class="text-center">
+            			<p class="h3 text-white font-weight-bold letter-spacing">Postback <span class="text-primary">Url</span></p>
+            		</div>
+            		<div class="row pt-3">
+<!--             			<div class="col-lg-4">
+            				<div class="card">
+		            			<div class="card-body">
+	            					<p class="h4 mb-3 border-bottom pb-2">Pineappel Sms</p>
+	            					<p class="text-secondary h6 ml-2">Inbound Url</p>
+	            					<p class="text-secondary ml-3">{{ site.domain }}/campaigns/pineapple/incoming</p>
+	            					<p class="text-secondary h6 ml-2">DLR Url</p>
+	            					<p class="text-secondary ml-3">{{ site.domain }}/campaigns/pineapple/dlr</p>
+		            			</div>
+            				</div>
+            			</div> -->
+            			<div class="col-lg-5 offset-lg-1">
+            				<div class="card">
+		            			<div class="card-body">
+	            					<p class="h4 mb-3 border-bottom pb-2 bold-2">Telnyx</p>
+	            					<p class="text-secondary h6 ml-2">Inbound Url</p>
+	            					<p class="text-secondary ml-4">{{ site.domain }}/telnyx/incoming</p>
+	            					<p class="text-secondary h6 ml-2">DLR Url</p>
+	            					<p class="text-secondary ml-4">{{ site.domain }}/telnyx/dlr</p>
+		            			</div>
+            				</div>
+            			</div>
+            			<div class="col-lg-5">
+            				<div class="card">
+		            			<div class="card-body">
+	            					<p class="h4 mb-3 border-bottom pb-2 bold-2">Zapier Webhook Url</p>
+	            					<p class="text-secondary h6 ml-2">Inbound Url</p>
+	            					<p class="text-secondary ml-4">{{ site.domain }}/facebook/incoming</p>
+	            					<p class="text-secondary h6 ml-2">DLR Url</p>
+	            					<p class="text-secondary ml-4">Not required</p>
+		            			</div>
+            				</div>
+            			</div>
+<!--             			<div class="col-lg-4">
+            				<div class="card">
+		            			<div class="card-body">
+	            					<p class="h4 mb-3 border-bottom pb-2">Twilio SMS</p>
+	            					<p class="text-secondary h6 ml-2">Inbound Url</p>
+	            					<p class="text-secondary ml-4">{{ site.domain }}/twilio/incoming</p>
+	            					<p class="text-secondary h6 ml-2">DLR Url</p>
+	            					<p class="text-secondary ml-4">{{ site.domain }}/twilio/dlr</p>
+		            			</div>
+            				</div>
+            			</div>
+            			<div class="col-lg-4">
+            				<div class="card">
+		            			<div class="card-body">
+	            					<p class="h5 mb-3 border-bottom pb-2">Bandwith</p>
+	            					<p class="text-secondary h6 ml-2">Inbound Url</p>
+	            					<p class="text-secondary ml-4">{{ site.domain }}/bandwidth/incoming</p>
+	            					<p class="text-secondary h6 ml-2">Inbound Url</p>
+	            					<p class="text-secondary ml-4">{{ site.domain }}/bandwidth/incoming</p>
+		            			</div>
+            				</div>
+            			</div>
+            			<div class="col-lg-4">
+            				<div class="card">
+		            			<div class="card-body">
+	            					<p class="h5 mb-3 border-bottom pb-2">Vonage</p>
+	            					<p class="text-secondary h6 ml-2">Inbound Url</p>
+	            					<p class="text-secondary ml-4">{{ site.domain }}/nexmo/incoming</p>
+	            					<p class="text-secondary h6 ml-2">DLR Url</p>
+	            					<p class="text-secondary ml-4">{{ site.domain }}/nexmo/dlr</p>
+		            			</div>
+            				</div>
+            			</div> -->
+            		</div>
+            	</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    {% if alert %}
+        const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'success',
+                title: '{{ alert }}'
+
+            })
+
+    {% elif error %}
+        const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'error',
+                title: 'OOps! {{ error }}'
+
+            })
+    {% endif %}
+</script>
+<script type="text/javascript">
+	document.getElementById("gateways").addEventListener("change", get_field);
+	function get_field(){
+		document.getElementById('pineapple').style.display="none";
+		document.getElementById('twilio').style.display="none";
+		document.getElementById('vonage').style.display="none";
+		document.getElementById('telnyx').style.display="none";
+		document.getElementById('bandwidth').style.display="none";
+		document.getElementById('signalwire').style.display="none";
+		document.getElementById('messagebird').style.display="none";
+		get_value = document.getElementById("gateways").value;
+		console.log(get_value)
+		if (get_value.includes("Pineapple")){
+			document.getElementById('pineapple').style.display="block";
+		} else if(get_value.includes("Twilio")){
+			document.getElementById('twilio').style.display="block";
+		}else if(get_value.includes("Telnyx")){
+			document.getElementById('telnyx').style.display="block";
+		}else if(get_value.includes("Vonage")){
+			document.getElementById('vonage').style.display="block";
+		}else if(get_value.includes("Bandwidth")){
+			document.getElementById('bandwidth').style.display="block";
+		}else if(get_value.includes("Signalwire")){
+			document.getElementById('signalwire').style.display="block";
+		}else if(get_value.includes("Plivo")){
+			document.getElementById('plivo').style.display="block";
+		}else if(get_value.includes("Messagebird")){
+			document.getElementById('messagebird').style.display="block";
+		}
+	}
+
+</script>
+<script type="text/javascript">
+    $('select').selectpicker();
+    document.getElementsByClassName("swal2-content")[0].style.display="none";
+</script>
+
+{% endblock %}
+{% endblock %}

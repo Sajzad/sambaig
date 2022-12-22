@@ -1,0 +1,516 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<section id="app">
+	<!-- giphy -->
+	<div class="modal fade pt-5" id="giphy-modal">
+	    <div class="modal-dialog modal-lg">
+	        <div class="modal-content card P-4">
+	            <div class="modal-body">
+	                <div class="animate__animated animate__fadeInDown">
+	                    <h5 class="pt-3 pl-3 bold-2 text-primary text-center">Search Your Favourite GIF</h5>
+	                    <div class="form-group" style="max-height:500px; overflow-y:scroll; overflow-x: hidden;">
+	                        <div class="row">
+	                            <div class="col-md-5 offset-md-4 my-3">
+	                                <input @keyup='searchGifs()' placeholder="Search GIF" type="text" v-model='searchGif' class="form-control">
+	                            </div>
+	                            <div class="col-md-12">
+	                                <div class="row">
+	                                    <!-- <pre>[[ searchedGifs ]]</pre> -->
+	                                    <div class="col-md-3 p-2 hover" v-if="searchedGifs" v-for='item in searchedGifs'>
+	                                        <img @click="selectGif(item.media[0].tinygif.url)" :src="item.media[0].tinygif.url" class="pointer hover" width="300px" height="150px">
+	                                    </div>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="float-right">
+	                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal">Close</button>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<!-- template modal -->
+    <div class="modal fade text-left pt-5" id="template-modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="col-md-12 p-0 p-lg-3">
+                        <h6 class="bold-2 text-secondary">Autoresponder Templates</h6>
+                        <div class="scroll-wrap pt-2 mb-3">
+                              <div class="card-body p-0 m-0">
+							    <div class="flex flex-column faq-section">
+							      <div class="row">
+							        <div class="col-md-12">
+							          <div id="accordion">
+							            <div v-for="item in titles" class="card shadow-1">
+							              <div class="card-header row" id="heading-1">
+							              		<div class="col-md-6">
+									                <h5 class="mb-0">
+									                  <a
+									                 	role = "button" 
+									                 	class = "text-primary pointer" 
+									                 	data-toggle = "collapse" 
+									                 	:href = "'#collapse-'+item.id" 
+									                 	aria-expanded = "true" 
+									                 	aria-controls = "collapse-1">
+									                  	[[item.title]]
+														
+									                   </a>
+									                </h5>
+								              	</div>
+								              	<div class="col-md-6">  
+													<span 
+							                			@click='deleteTitle(item.id)' 
+							                			class="text-secondary float-right py-1 px-2 hover-white pointer">
+														<i class="fad fa-trash-alt h6"></i>
+													</span>
+													<span 
+							                			@click='getTitleToEdit(item.id)' 
+							                			class="text-secondary py-1 px-2 hover-white float-right pointer">
+														<i data-target='#edit-title' data-toggle='modal' class="fad fa-pen h6"></i>
+													</span>
+												</div>
+							              </div>
+							              <div :id="'collapse-'+item.id" class="collapse" data-parent="#accordion" aria-labelledby="heading-1">
+							                <div class="card-body">
+							                	<table class="table table-borderless">
+							                		<tbody>
+							                			<tr class="m-0 p-0" v-for='resp in item.responses'>
+							                				<td class="m-0 p-0">
+							                					<p>
+												                  	<span 
+												                  		@click='selectResponse(resp.id)'
+												                  		title="click to add" 
+												                  		class="pointer">
+												                  		<i class="fad fa-at"></i>  
+												                  		[[resp.response]]         	
+												                  	</span>
+											                  	</p>
+							                				</td>
+							                				<td class="m-0 p-0">
+							                					<span class="d-flex">
+							                						<i @click='getQResponse(resp.id)' class="fad fa-pen pointer hover-white p-1"
+							                						data-target="#edit_response"
+							                						data-toggle="modal"
+							                						></i>
+									                  				<i @click='deleteResponse(resp.id)' class="fad fa-trash-alt pointer hover-white px-2 py-1"></i>
+									                  			</span>
+							                				</td>
+							                			</tr>
+							                		</tbody>
+							                	</table>
+							                </div>
+							              </div>
+							            </div>
+							          </div>
+							        </div>
+							      </div>
+							    </div>
+							  </div>
+                        </div>
+                        <a @click="getTitles()" data-target='#quick-response-modal' data-toggle='modal' class="bold-1 pointer text-primary">Create new response +</a>
+                        <div class="float-right mt-3">
+                            <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+     <!-- edit group title -->
+    <div class="modal fade pt-3" id="edit-title">
+        <div class="modal-dialog">
+            <div class="modal-content card">
+                <div class="modal-body">
+                    <div class="animate__animated animate__fadeInDown">
+                        <h4 class="pt-3 pl-3 bold-2">Edit Group Title</h4>
+                            <div class="card-body">
+                                <form @submit.prevent='editQResponse()' class="form-group" method="POST" enctype="multipart/form-data">
+                                 {% csrf_token %}
+                                    <div class="form-group">
+                                        <input v-model='title.title' type="text" class="form-control">
+                                    </div>
+                                    <div class="float-right mt-3">
+                                        <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                                        <button @click.prevent='editQTitle(title.id)' type="submit" class="btn btn-default btn-sm">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+	<!-- create new quick response -->
+    <div class="modal fade pt-3" id="quick-response-modal">
+        <div class="modal-dialog">
+            <div class="modal-content card">
+                <div class="modal-body">
+                    <div class="animate__animated animate__fadeInDown">
+                        <h4 class="pt-3 pl-3 bold-2">Create Quick Response</h4>
+                            <div class="card-body">
+                                <form class="form-group" method="POST">
+                                 {% csrf_token %}
+                             	<div v-if='isGroup' class="form-group">
+                             		<input type="text" class="form-control" v-model="groupTitle">
+                             		<div class="float-right mt-4">
+                             			<button 
+                             				@click.prevent = 'createGroupTitle()' 
+                             				class = "btn btn-primary btn-sm float-right" 
+                             				title = "submit">create</button>
+                             			<button data-dismiss='modal' class="btn btn-danger btn-sm float-right mr-2" title="submit">close</button>
+                             		</div>
+                             	</div>
+                                 <div v-if="!isGroup">
+                                    <div class="form-group">
+                            			<label for="inputPassword3" class="col-form-label">Select Group Title *</label>
+		                                <div class="form-group">
+		                                    <select v-model='group_title_id' class="form-control" name='contact_id' name="form_ids" required>
+		                                        <option v-for='item in titles' class="text-secondary" :value="item.id">[[item.title]] </option>
+		                                    </select>
+		                                </div>
+                        			</div>
+                                    <div v-if="!isGroup" class="row mt-2">
+                                        <div class="col-md-12">
+                                            <textarea class="form-control" v-model='newResponse' placeholder="Add New Response" rows="6"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="float-left mt-3">
+                                    	<p @click="showTitleForm()" class="text-primary pointer bold-1">+ create Group Title</p>
+                                    </div>
+                                    <div class="float-right mt-3">
+                                        <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                                        <button @click.prevent='createQResponse()' type="submit" class="btn btn-default btn-sm">Create</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- edit quick response -->
+    <div class="modal fade pt-3" id="edit_response">
+        <div class="modal-dialog">
+            <div class="modal-content card">
+                <div class="modal-body">
+                    <div class="animate__animated animate__fadeInDown">
+                        <h4 class="pt-3 pl-3 bold-2">Edit Quick Response</h4>
+                            <div class="card-body">
+                                <form class="form-group" method="POST" enctype="multipart/form-data">
+                                 {% csrf_token %}
+                                 	<!-- <pre>[[response]]</pre> -->
+                                 	<div class="form-group">
+                                 		<select v-if='response' v-model='group_title_id' class="form-control">
+                                 			<option 
+                                 				v-for='item in titles'
+                                 				:selected = "item.id == response.title.id"
+                                 				:value="item.id">[[item.title]]</option>
+
+                                 		</select>
+                                 	</div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-12">
+                                            <textarea class="form-control" v-model='response.response' placeholder="Add New Response" rows="6"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="float-right mt-3">
+                                        <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                                        <button @click.prevent='editResponse(response.id)' type="submit" class="btn btn-default btn-sm">Update Response</button>
+                                    </div>
+                                </form>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+	<!-- Custom Field modal -->
+    <div class="modal fade text-left pt-5" id="custom-field">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="col-md-12 p-3">
+                        <h6 class="bold-2 text-secondary">Custom Field</h6>
+                        <div class="pt-2 mb-3">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Field</th>
+                                        <th>Merge Tag</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>First Name</td>
+                                        <td class="pointer bold-1" @click="addCustomField('%%first_name%%')">%%first_name%%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Last Name</td>
+                                        <td class="pointer bold-1" @click="addCustomField('%%last_name%%')">%%last_name%%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Email</td>
+                                        <td class="pointer bold-1" @click="addCustomField('%%email%%')">%%email%%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="float-right mt-3">
+                            <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+	<div class="content-wrapper text-dark">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-6 offset-md-2">
+					<div class="card">
+						<div class="card-header">
+							<h5 class="bold-2 text-secondary">Edit Autoresponse</h5>
+						</div>
+						<form class="form-group" method="post" enctype="multipart/form-data" id="add-campaign">
+		                    {% csrf_token %}
+		                        <div class="card-body px-2 px-lg-5">
+		                        	<div class="row">
+		                        		<div class="col-md-6">
+				                            <div class="form-group">
+				                                <label for="name" class="control-label">Name</label>
+				                                <input class="form-control" value="{{autoresponse.name}}" name="name" placeholder="Type Name" required>
+				                            </div>
+				                        </div>
+				                    	<div class="col-md-6">
+				                            <div class="form-group">
+				                                <label for="inputPassword3" class="control-label">Contact List *</label>
+				                                <div class="form-group">
+				                                    <select class="form-control" name='contact_id' data-size='6' class="selectpicker"  data-actions-box="true" data-live-search="true" name="form_ids" required>
+				                                    {% for item in contacts %}
+				                                        <option class="text-secondary" value="{{ item.id }}">{{ item.form_name }}</option>
+				                                    {% endfor %}
+				                                    	<option value="{{autoresponse.contact_id}}" selected>{{ autoresponse.contact.form_name }}</option>
+				                                    </select>
+				                                </div>
+				                            </div>
+				                        </div>
+				                    </div>
+		                            <div v-if='selectedGif' class="d-flex flex-row" style="position: relative; bottom:2px">
+                                        <span class="mb-2">
+                                            <img :src="selectedGif" width="150px" height="70px">
+                                        </span>
+                                        <span 
+                                            @click = "cancelGif" 
+                                            class="ml-3 pointer" 
+                                            title="remove the gif">
+                                                <i class="fas fa-times"></i>
+                                        </span>
+                                    </div> 
+	                                <div class="form-group">
+		                                <label>Text Message</label>
+		                                <!-- gif -->
+		                                <input type="hidden" id="gif_url" value="{{autoresponse.gif_url}}">
+                                    	<input type="hidden" name="gif_url" :value="selectedGif">
+
+		                                <input type="hidden" id="response" value="{{ autoresponse.response }}" name="">
+		                                <textarea v-model='message' rows="3" class="form-control mb-1" name='response'></textarea>
+
+		                                <span class="">
+		                                	<p 
+                                                style = "letter-spacing: 3px;" 
+                                                class = "badge badge-secondary mr-2 pointer mx-1" data-target = '#giphy-modal'
+                                                title="Find your favourite GIF" 
+                                                data-toggle='modal'>GIF
+                                            </p>
+		                                    <span @click='getEmojis()' class="pointer">&#x1F603;</span>
+		                                    <span>
+		                                        <i 
+		                                        	@click='getTitles()'
+		                                            class="fas fa-tablet-alt pointer mx-2"
+		                                            data-target = "#template-modal"
+		                                            data-toggle = 'modal' 
+		                                            title="templates"></i>
+		                                    </span>
+		                                    <span data-target="#custom-field" data-toggle="modal">
+		                                        <i 
+		                                            class = "fas fa-shield-check pointer" 
+		                                            title = "custom fields">
+		                                        </i>
+		                                    </span>
+		                                </span>
+		                               	<div v-if='isEmoji' class="autoresponder-emoji border-1">
+		                                    <div class="d-flex justify-content-between">
+                                        		<p class="bold-1">&#x1F603; Find your favourite Emoiji</p>
+                                        		<p @click="closeEmoji()" class="pointer"><i class="fas fa-times"></i></p>
+                                    		</div>
+		                                    <input @keyup='searchEmojis()' v-model='emojiSearch' type="text" class="form-control input-sm" placeholder="Search emoji">
+		                                    <div class="mt-4 emoji-scroll">
+		                                        <span class="mx-1 pointer">
+		                                            <span @click='selectEmoji(item.character)' v-for='item in emojis' style="font-size:20px"> [[item.character]] </span>
+		                                        </span>
+		                                    </div>
+	                                	</div>      
+		                            </div>
+		                            <div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text">Upload</span>
+										</div>
+										<div class="custom-file">
+											<input @input='handlingFile()' type="file" name='image' class="custom-file-input" id="inputGroupFile01">
+											<label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+										</div>
+									</div>
+		                            <div class="row">
+		                            	<div class="col-md-12 my-0 py-0">
+				                            <div class="form-group">
+				                                <label for="image" class="control-label">Select Image from Previous Uploads</label>
+				                                <div class="form-group">
+				                                    <select data-size='5' name="image_id" title="Select Image" class="selectpicker form-control">
+				                                    	<option value="">None</option>
+				                                        {% for item in images %}
+				                                            <option value="{{item.id}}" class="text-dark" data-content="<img width=100 height=50 src='{{ item.image.url }}'>"></option>
+				                                        {% endfor %}
+				                                        {% if autoresponse.image_id %}
+				                                        	<option value="{{autoresponse.image_id}}" class="text-dark" data-content="<img width=100 height=50 src='{{ autoresponse.image.image.url }}'>" selected></option>
+				                                        {% endif %}
+				                                    </select>
+				                                </div>
+				                            </div>
+				                        </div>
+				                    </div>                        
+		                            <div class="row">
+		                                <div class="form-group col-md-4">
+		                                    <label for="msg">Delays</label>
+		                                    <input value="{{autoresponse.delay_days}}" name="delay_days" type="number" class="form-control" placeholder="Day">
+		                                </div>                            
+		                                <div class="form-group col-md-4 mt-2">
+		                                    <label></label>
+		                                    <input value="{{autoresponse.delay_hours}}" name="delay_hours" type="number" class="form-control" placeholder="Hours">
+		                                </div>                            
+		                                <div class="form-group col-md-4 mt-2">
+		                                    <label for="msg"></label>
+		                                    <input value="{{autoresponse.delay_mins}}" name="delay_mins" type="number" class="form-control" placeholder="Minutes">
+		                                </div>
+		                            </div>
+		                            <div class="form-group">
+	                        			<label>Only Send Between</label>
+	                        			<div class="row">
+		                                    <div class="col-md-6">
+		                                        <input 
+		                                        	type="time" 
+		                                        	value="{{ autoresponse.first_time|time:'H:i:s' }}" 
+		                                        	class="form-control" 
+		                                        	name="first_time">
+		                                    </div>
+		                                    <div class="col-md-6">
+		                                        <input 
+		                                        	type="time" 
+		                                        	value="{{autoresponse.last_time|time:'H:i:s'}}" 
+		                                        	class="form-control" 
+		                                        	name="last_time">
+		                                    </div>
+		                                </div>
+		                            </div>
+		                            <div class="form-group">
+		                                <label>Send on these days only</label>
+		                                <div class="form-inline">
+		                                    <label class="checkbox-inline">
+		                                        <input 
+		                                        	{% if autoresponse.is_sat %}checked{% endif %} 
+		                                        	name='is_sat' 
+		                                        	class="mx-2" 
+		                                        	type="checkbox">Sat
+		                                    </label>
+		                                    <label class="checkbox-inline">
+		                                        <input 
+		                                        	{% if autoresponse.is_sun %}checked{% endif %}
+		                                        	name = 'is_sun' 
+		                                        	class = "mx-2" 
+		                                        	type = "checkbox">Sun
+		                                    </label>
+		                                    <label class="checkbox-inline">
+		                                        <input 
+		                                        	{% if autoresponse.is_mon %}checked{% endif %}
+		                                        	name = 'is_mon' 
+		                                        	class = "mx-2" 
+		                                        	type = "checkbox">Mon
+		                                    </label>
+		                                    <label class="checkbox-inline">
+		                                        <input 
+		                                        	{% if autoresponse.is_tue %}checked{% endif %}
+		                                        	name = 'is_tue' 
+		                                        	class = "mx-2" 
+		                                        	type = "checkbox">Tue
+		                                    </label>
+		                                    <label class="checkbox-inline">
+		                                        <input 
+		                                        	{% if autoresponse.is_wed %}checked{% endif %} 
+		                                        	name = 'is_wed' 
+		                                        	class = "mx-2" 
+		                                        	type = "checkbox">Wed
+		                                    </label>                                
+		                                    <label class="checkbox-inline">
+		                                        <input 
+		                                        	{% if autoresponse.is_thu %}checked{% endif %}
+		                                         	name = 'is_thu' 
+		                                         	class = "mx-2" 
+		                                         	type = "checkbox">Thu
+		                                    </label>                                
+		                                    <label class="checkbox-inline">
+		                                        <input 
+		                                        	{% if autoresponse.is_fri %}checked{% endif %} 
+		                                        	name = 'is_fri' 
+		                                        	class = "mx-2" 
+		                                        	type = "checkbox">Fri
+		                                    </label>
+		                                </div> 
+                            		</div>
+                            		<div class="float-right">
+	                                	<button name="check" value="create" type="submit" class="btn-sm btn btn-success">Update</button>
+	                            	</div>
+                            	</div>
+	                            
+		                </form>
+					</div>
+				</div>
+				<div class="col-md-3 animate__animated animate__fadeInUp">
+                    <div class="smartphone">
+                        <div class="content-smartphone">
+                            <div class="py-2 pl-2">
+                            	<div class="pb-2" v-if='selectedGif'>
+	                                <img :src="[[selectedGif]]" width="150px" height="80px">
+	                            </div>
+                                <div class="sms-box" v-if="message || ani">
+                                    <p v-if='ani' v-model='ani' class="font-italic bold-1 text-secondary"></p>
+                                    <p v-if="message">[[message]]</p>
+                                </div>
+                            </div>
+                            <div 
+                                class="d-flex justify-content-center align-items-center w-100 bold-1 text-secondary" 
+                                style="position: absolute; bottom:0px;">
+                                <p>message preview</p>
+                            </div>
+                        </div>
+                    </div>
+            	</div>
+			</div>
+		</div>
+	</div>
+</section>
+{% endblock %}
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script type="text/javascript" src="{% static 'vue/autoresponders.js' %}"></script>
+    <script>
+        $('select').selectpicker({
+            style: 'btn-default'
+         });
+    </script>
+
+{% endblock %}

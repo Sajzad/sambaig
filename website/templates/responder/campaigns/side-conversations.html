@@ -1,0 +1,830 @@
+{% extends 'base.html' %}
+{% block title %} Leads {% endblock %}
+{% load static %}
+{% block extra_head %}
+    <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
+{% endblock %}
+{% block content %}
+<div id="app" class="">
+    <!-- template modal -->
+    <div class="modal fade text-left pt-5" id="template-modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="col-md-12 p-0 p-lg-3">
+                        <h6 class="bold-2 text-secondary">Autoresponder Templates</h6>
+                        <div class="scroll-wrap pt-2 mb-3">
+                              <div class="card-body p-0 m-0">
+                                <div class="flex flex-column faq-section">
+                                  <div class="row">
+                                    <div class="col-md-12">
+                                      <div id="accordion">
+                                        <div v-for="item in titles" class="card shadow-1">
+                                          <div class="card-header row" id="heading-1">
+                                                <div class="col-md-6">
+                                                    <h5 class="mb-0">
+                                                      <a
+                                                        role = "button" 
+                                                        class = "text-primary pointer" 
+                                                        data-toggle = "collapse" 
+                                                        :href = "'#collapse-'+item.id" 
+                                                        aria-expanded = "true" 
+                                                        aria-controls = "collapse-1">
+                                                        [[item.title]]
+                                                        
+                                                       </a>
+                                                    </h5>
+                                                </div>
+                                                <div class="col-md-6">  
+                                                    <span 
+                                                        @click='deleteTitle(item.id)' 
+                                                        class="text-secondary float-right py-1 px-2 hover-white pointer">
+                                                        <i class="fad fa-trash-alt h6"></i>
+                                                    </span>
+                                                    <span 
+                                                        @click='getTitleToEdit(item.id)' 
+                                                        class="text-secondary py-1 px-2 hover-white float-right pointer">
+                                                        <i data-target='#edit-title' data-toggle='modal' class="fad fa-pen h6"></i>
+                                                    </span>
+                                                </div>
+                                          </div>
+                                          <div :id="'collapse-'+item.id" class="collapse" data-parent="#accordion" aria-labelledby="heading-1">
+                                            <div class="card-body">
+                                                <table class="table table-borderless">
+                                                    <tbody>
+                                                        <tr class="m-0 p-0" v-for='resp in item.responses'>
+                                                            <td class="m-0 p-0">
+                                                                <p>
+                                                                    <span 
+                                                                        @click='selectResponse(resp.id)'
+                                                                        title="click to add" 
+                                                                        class="pointer">
+                                                                        <i class="fad fa-at"></i>  
+                                                                        [[resp.response]]           
+                                                                    </span>
+                                                                </p>
+                                                            </td>
+                                                            <td class="m-0 p-0">
+                                                                <span class="d-flex">
+                                                                    <i @click='getQResponse(resp.id)' class="fad fa-pen pointer hover-white p-1"
+                                                                    data-target="#edit_response"
+                                                                    data-toggle="modal"
+                                                                    ></i>
+                                                                    <i @click='deleteResponse(resp.id)' class="fad fa-trash-alt pointer hover-white px-2 py-1"></i>
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                        </div>
+                        <a @click="getTitles()" data-target='#quick-response-modal' data-toggle='modal' class="bold-1 pointer text-primary">Create new response +</a>
+                        <div class="float-right mt-3">
+                            <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+     <!-- edit group title -->
+    <div class="modal fade pt-3" id="edit-title">
+        <div class="modal-dialog">
+            <div class="modal-content card">
+                <div class="modal-body">
+                    <div class="animate__animated animate__fadeInDown">
+                        <h4 class="pt-3 pl-3 bold-2">Edit Group Title</h4>
+                            <div class="card-body">
+                                <form @submit.prevent='editQResponse()' class="form-group" method="POST" enctype="multipart/form-data">
+                                 {% csrf_token %}
+                                    <div class="form-group">
+                                        <input v-model='title.title' type="text" class="form-control">
+                                    </div>
+                                    <div class="float-right mt-3">
+                                        <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                                        <button @click.prevent='editQTitle(title.id)' type="submit" class="btn btn-default btn-sm">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+    <!-- create new quick response -->
+    <div class="modal fade pt-3" id="quick-response-modal">
+        <div class="modal-dialog">
+            <div class="modal-content card">
+                <div class="modal-body">
+                    <div class="animate__animated animate__fadeInDown">
+                        <h4 class="pt-3 pl-3 bold-2">Create Quick Response</h4>
+                            <div class="card-body">
+                                <form class="form-group" method="POST">
+                                 {% csrf_token %}
+                                <div v-if='isGroup' class="form-group">
+                                    <input type="text" class="form-control" v-model="groupTitle">
+                                    <div class="float-right mt-4">
+                                        <button 
+                                            @click.prevent = 'createGroupTitle()' 
+                                            class = "btn btn-primary btn-sm float-right" 
+                                            title = "submit">create</button>
+                                        <button data-dismiss='modal' class="btn btn-danger btn-sm float-right mr-2" title="submit">close</button>
+                                    </div>
+                                </div>
+                                 <div v-if="!isGroup">
+                                    <div class="form-group">
+                                        <label for="inputPassword3" class="col-form-label">Select Group Title *</label>
+                                        <div class="form-group">
+                                            <select v-model='group_title_id' class="form-control" name='contact_id' name="form_ids" required>
+                                                <option v-for='item in titles' class="text-secondary" :value="item.id">[[item.title]] </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div v-if="!isGroup" class="row mt-2">
+                                        <div class="col-md-12">
+                                            <textarea class="form-control" v-model='newResponse' placeholder="Add New Response" rows="6"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="float-left mt-3">
+                                        <p @click="showTitleForm()" class="text-primary pointer bold-1">+ create Group Title</p>
+                                    </div>
+                                    <div class="float-right mt-3">
+                                        <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                                        <button @click.prevent='createQResponse()' type="submit" class="btn btn-default btn-sm">Create</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- edit quick response -->
+    <div class="modal fade pt-3" id="edit_response">
+        <div class="modal-dialog">
+            <div class="modal-content card">
+                <div class="modal-body">
+                    <div class="animate__animated animate__fadeInDown">
+                        <h4 class="pt-3 pl-3 bold-2">Edit Quick Response</h4>
+                            <div class="card-body">
+                                <form class="form-group" method="POST" enctype="multipart/form-data">
+                                 {% csrf_token %}
+                                    <!-- <pre>[[response]]</pre> -->
+                                    <div class="form-group">
+                                        <select v-if='response' v-model='group_title_id' class="form-control">
+                                            <option 
+                                                v-for='item in titles'
+                                                :selected = "item.id == response.title.id"
+                                                :value="item.id">[[item.title]]</option>
+
+                                        </select>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-12">
+                                            <textarea class="form-control" v-model='response.response' placeholder="Add New Response" rows="6"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="float-right mt-3">
+                                        <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                                        <button @click.prevent='editResponse(response.id)' type="submit" class="btn btn-default btn-sm">Update Response</button>
+                                    </div>
+                                </form>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+    <!-- schedule modal -->
+    <div class="modal fade" id="schedule-modal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content card">
+                <div class="modal-body">
+                    <div class="animate__animated animate__fadeInDown">
+                        <h4 class="pt-3 pl-3 bold-2">Schedule your message</h4>
+                        <div class="form-group">
+                            <label>Date and Time *</label>
+                            <input type="datetime-local" v-model='scheduledAt' class="form-control">
+                        </div>
+                        <div class="float-right">
+                            <button type="button" class="btn-hover-sm color-11" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- schedule modal -->
+    <div class="modal fade pt-5" id="giphy-modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content card P-4">
+                <div class="modal-body">
+                    <div class="animate__animated animate__fadeInDown">
+                        <h5 class="pt-3 pl-3 bold-2 text-primary text-center">Search Your Favourite GIF</h5>
+                        <div class="form-group" style="max-height:500px; overflow-y:scroll; overflow-x: hidden;">
+                            <div class="row">
+                                <div class="col-md-5 offset-md-4 my-3">
+                                    <input @keyup='searchGifs()' placeholder="Search GIF" type="text" v-model='searchGif' class="form-control">
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <!-- <pre>[[ searchedGifs ]]</pre> -->
+                                        <div class="col-md-3 p-2 hover" v-if="searchedGifs" v-for='item in searchedGifs'>
+                                            <img class="rounded" @click="selectGif(item.media[0].tinygif.url)" :src="item.media[0].tinygif.url" class="pointer hover" width="300px" height="150px">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="float-right">
+                            <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- new message modal -->
+    <div class="modal fade" id="media-modal">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content card">
+                <div class="modal-body">
+                    <div class="animate__animated animate__fadeInDown">
+                        <h4 class="pt-3 pl-3 bold-2">Upload Images</h4>
+                        <div class="card-body">
+                            <form @submit.prevent='uploadImage()' class="form-group" method="POST" enctype="multipart/form-data">
+                             {% csrf_token %}
+                                <div class="row mt-2">
+                                    <div class="col-md-8">
+                                        <input multiple type="file" @change='handlingFile' placeholder="Upload File">
+                                    </div>
+                                    <div class="col-md-4 pt-lg-0 pt-2">
+                                        <button class="btn btn-primary">Upload</button>   
+                                    </div>
+                                </div>
+                            </form>
+                             <div class="my-4">
+                                <h5 class="bold-2 text-secondary">
+                                    <button id="deselect" @click='selectMMS' class="btn btn-danger btn-sm">deselect</button>
+                                    <span><i class="fas fa-images mr-2"></i></span>
+                                    Select from recent Uploads 
+                                </h5>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 p-2 form-check" v-for='item in images'>
+                                    <input v-model='mms' name="mms" :value="item.id" type="radio" class="form-check-input">
+                                    <img class="rounded" :src="'/media/'+item.image" width="150px" height="80px">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="float-right">
+                            <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- update user modal -->
+    <div class="modal fade" id="user-modal">
+        <div class="modal-dialog text-dark">
+            <div class="modal-content card">
+                <div class="modal-header">
+                    <p class="h3 sweet-text bold-2">Update Contact</p>
+                </div>
+                <div class="modal-body pb-4 px-5">
+                    <form method="post" @submit.prevent='updateList()'>
+                        {% csrf_token %}
+                        <!-- <pre>[[contact]]</pre> -->
+                        <div class="form-group">
+                            <label class="control-label">First Name</label>
+                            <input type="text" v-model='contact.first_name' class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Last Name</label>
+                            <input type="text" v-model='contact.last_name' class="form-control">
+                        </div> 
+                        <div class="form-group">
+                            <label class="control-label">Email</label>
+                            <input type="text" v-model='contact.email' class="form-control">
+                        </div> 
+                        <div class="form-group">
+                            <label>Select a List</label>
+                            <multiselect
+                                v-model="list"
+                                placeholder="Select List"
+                                label="form_name"
+                                track-by="id" 
+                                :options="lists"
+                                :searchable = "true"
+                                :taggable="true"
+                            ></multiselect>
+                        </div>
+                        <div class="modal-footer float-right">
+                    <button data-dismiss='modal' class="btn bold-1 btn-danger btn-sm">close</button>
+                    <button type="submit" class="btn btn-default bold-1 btn-sm">update</button>
+                </div>                        
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    <section class="content px-lg-3 p-0 m-0">
+        <div class="row radius inbox-page-height" id="chat-container">
+            <div class="col-md-3 leads bg-offwhite border-right" id="aside">
+                <div class="d-flex flex-row border-bottom pb-1">
+                    <div class="form-group ml-0 ml-lg-2 mt-2 mb-0">
+                        <input @change="searchDnis()" v-model="input_dnis" placeholder="search number" type="text" class="input-sm form-control" id="search">
+                        <p  
+                            v-show='is_loading' 
+                            style="position:absolute; top: 60px; left: 50px;" 
+                            class="pt-1 text-primary text-center bold-2">Please Wait .....</p>
+                    </div>
+                    <div class="">
+                        <button 
+                            v-if='ani'
+                            @click='enableNewMsgInput()' 
+                            class="btn btn-info btn-sm mt-2 mx-2 bold-1">
+                            New</button>
+                    </div>
+                    <div class="mt-2">
+                        <select v-model='filter_type' @change='filterLeads()'>
+                            <option :value="filter_types.newest">newest wait</option>
+                            <option :value="filter_types.longest">longest wait</option>
+                        </select>
+                    </div>
+                </div>
+                <ul v-show='!is_loading' id="scroll" class="chat-aside-height scroll-y">
+                    <li 
+                        class = "dnis checked" 
+                        id = "scroll-next" 
+                        v-for = "item in leads"
+                        @click = "chatDetails(item.dnis)"
+                        :class = "{'pointer-color': clickedDnis == item.dnis}"
+                        style="cursor: pointer;">
+                        <div 
+                            class="pl-lg-4 pl-1 d-flex justify-content-between animate__animated animate__lightSpeedInLeft">
+                            <h2>
+                                <span
+                                    v-if='item.name.length>1' 
+                                    class="text-dark bold-1" >
+                                    <i class="fad fa-inbox-in mr-2"></i>[[ item.name ]]</span>
+                                <span 
+                                    v-else
+                                    class="text-dark bold-1">
+                                    <i class="fad fa-inbox-in mr-2"></i>[[ item.dnis|phone_number ]]</span>
+                            </h2>
+                            <p 
+                                v-if='!item.is_replied'
+                                class="text-danger bold-1 mr-3">
+                                <span>waiting</span> 
+                                [[ timeSince(item.latest_timestamp) ]]</p>
+                            <p 
+                                v-else
+                                class="text-secondary bold-1 mr-3">
+                                [[ timeSince(item.latest_timestamp) ]]</p>
+                        </div>
+                        <h6 
+                            v-if = "!item.is_replied"
+                            class="ml-4 text-danger bold-2" 
+                            style="font-size:14px">
+
+                            <span v-if='item.latest_sms'>[[item.latest_sms|truncate(40)]]</span>
+                            <!-- <span class="badge badge-warning" v-else-if='item.gif_url'>GIF</span> -->
+                            <!-- <span class="badge badge-success" v-else-if='item.image'>Image</span> -->
+                        </h6>
+                        <h6 
+                            v-else
+                            class="ml-4 text-secondary bold-1" 
+                            style="font-size:14px">[[item.latest_sms|truncate(40)]]
+                        </h6>
+                    </li>
+                    <div v-if='leads.length>10 && total_lead != leads.length' class="pl-4 text-center">
+                        <span 
+                            @click='loadMoreLead' 
+                            class="badge badge-warning my-2 pointer">load more</span>
+                    </div>
+                </ul>
+            </div>
+            <div 
+                class="col-md-9 pt- sm-display-none p-0 m-0 bg-white h-100" 
+                id="chat-details" 
+                style=" font-size: 14px;">
+                
+                <div class="d-flex bg-offwhite border py-2 px-2 justify-content-between">
+                    <div class="d-flex flex-row" v-show='dnis && !newMsgInput' class="bold-2 pl-2">
+                        <div class="sm-display-block" style="display:none;">
+                            <i  
+                                @click = "backToLead()"
+                                class="fad fa-long-arrow-alt-left text-primary fa-2x"></i>
+                                <i class=""></i>
+                        </div>
+                        <h6 v-if='name' class="text-primary bold-1 pl-3 pt-1">[[name]]</h6>
+                        <h6 v-else class="text-primary pl-3 pt-1 bold-1">[[dnis|phone_number]]</h6>
+                    </div>
+                    <div v-if='newMsgInput' class="col-md-12 form-group pr-4 py-0 my-0">
+                        <input 
+                            v-model='newNumber' 
+                            placeholder="type number" 
+                            type="tel" 
+                            class="form-control">
+                    </div>
+                    <div v-if='!newMsgInput' class="sm-display-none">
+                        <h6>
+                            <span v-if='ani'>
+                                <span class="bold-2">
+                                    <i class="fad fa-inbox-in mr-2"></i>Inbox - 
+                                </span> [[ani|phone_number]](<span class="bold-1 text-primary">[[leads.length]]/[[total_lead]])</span>
+                            </span>
+                            <span class="bold-1 text-primary text-center" v-else>Please Add Your Contact Number. Contact Admin to add a number to your account.</span>
+                        </h6>
+                    </div>
+                    <div class="d-flex flex-row">
+                        <div class="mr-2 sm-display-none" v-if='chats.length>0'>
+                            <h6 class="bold-2">Drip Automation/
+                                <span v-if='isManual'>on</span>
+                                <span v-else>off</span>
+                            </h6>
+                        </div>
+                        <div v-if='chats.length>0'>
+                            <label v-if='!isManual' class="switch">
+                                <input 
+                                    type="checkbox" 
+                                    @click.prevent="switchAutoresponse()">
+                                <input 
+                                    type="checkbox" 
+                                    @click.prevent="switchAutoresponse()"
+                                    >
+                                <span class="slider round"></span>
+                            </label> 
+                            <label v-else class="switch">
+                                <input 
+                                    type="checkbox" 
+                                    @click.prevent="switchAutoresponse()">
+                                <input 
+                                    type="checkbox" 
+                                    @click.prevent="switchAutoresponse()"
+                                    checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div v-if='chats.length>0' class="ml-4">
+                            <i
+                                @click='getList()'
+                                data-target='#user-modal'
+                                data-toggle = 'modal'
+                                style = 'z-index: 2; font-size: 18px;'
+                                class="fal fa-user-edit pointer text-primary mr-3"></i>
+                        </div>
+                        <div class="more" v-show='chats.length>0'>
+                            <i 
+                                title="Delete Lead" 
+                                @click.prevent="removeItem(dnis)" style="font-size: 18px;" class="far fa-trash pointer text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+                <ul 
+                    v-if='newMsgInput || chats.length>0' 
+                    id="chat" 
+                    class="p-0 m-0 p-lg-2 scroll-y border-bottom chat-page-height">
+
+                    <!-- <pre style="max-height: 400px;">[[emojis]]</pre> -->
+                    <!-- <pre style="max-height: 200px;">[[chats]]</pre> -->
+                    <!-- <pre style="max-height: 200px;">[[leads]]</pre> -->
+                    <div v-if='!messageLoading'>
+                        <div v-for="item in chats">
+                            <li class="p-lg-1 m-0 mx-lg-2 you animate__animated animate__fadeInBottomRight" v-if="item.sent">
+                                <div 
+                                    :class = "{'mt-0': item.image}"
+                                    v-if = 'item.sent' 
+                                    class="entete mx-2">
+                                    <span class="status green"></span>
+                                    <h2>[[ ani|phone_number ]]</h2>
+                                    <h3 class="mx-2">[[ formatTime(item.timestamp) ]]</h3>
+                                    <i class="fas fa-chevron-circle-up text-blue"></i> 
+                                    <h3 v-if="item.del_status=='delivered'" class=" font-weight-bolder text-success ml-1">
+                                        [[ item.del_status ]]
+                                    </h3>
+                                    <h3 v-else class=" font-weight-bolder text-danger ml-1">
+                                        <i class="fas fa-ban"></i> <span>[[item.error]]</span>
+                                    </h3>
+                                    <h3 class="text-secondary bold-2" v-if='item.is_bulk'>yet to be sent(sent in bulk)</h3>
+                                </div>
+                                <div v-if='item.image' class="pt-2">
+                                    <a title="Click to open the image in a new tab" :href="item.image.image" target="_blank">
+                                        <img 
+                                            class="rounded pt-2 chat-img outbound-hover" 
+                                            :src="item.image.image">
+                                    </a>
+                                    <a 
+                                        :href="item.image.image"
+                                        style="z-index: -100;" 
+                                        class="text-primary pl-2 pl-lg-3" download>
+                                        <i 
+                                            title="click to download" 
+                                            class="fas fa-download" 
+                                            style="font-size:20px"></i>
+                                    </a>
+                                </div>
+                                <div v-if="item.gif_url" class="pt-2">
+                                    <img class="rounded chat-img" :src="item.gif_url">
+                                </div>
+                                <div v-if='item.sent && !item.is_scheduled' class="mt-2 bg-bubble text-dark message">
+                                    <p class="m-2" style="font-size: 14px">[[ item.sent ]]</p>
+                                </div>
+                                <div class="d-inline-block">
+                                    <div 
+                                        v-if='item.sent && item.is_scheduled' 
+                                        class="border border-success rounded bold-1">
+                                        <p class="m-2 text-dark" 
+                                        style="font-size: 14px">[[ item.sent ]]</p>
+                                    </div>
+                                </div>
+                                <p v-if='item.is_scheduled' class="pt-2 bold-1">
+                                    <span><i class="fal fa-clock mr-1 text-secondary"></i></span>Scheduled for [[ formatDate(item.scheduled_at) ]]
+                                    <span
+                                        @click='cancelScheduledSms(item.id)' 
+                                        class="pl-3 text-primary bold-1 pointer">cancel</span>
+                                </p>
+                            </li>
+                            <li v-if='item.note' class="you animate__animated animate__fadeInBottomRight">
+                                <!-- <pre>[[item]]</pre> -->
+                                <div class="d-flex justify-content-center">
+                                    <span style="margin-top: 5px!important;" class="status green"></span>
+                                    <h2 class="bold-2 text-capitaliz">[[ item.admin_name ]]</h2>
+                                    <h3 class="ml-2">[[ formatTime(item.timestamp) ]]</h3>
+                                    
+                                    <i  
+                                        v-if = '!item.is_liked'
+                                        @click='likeNote(item.id)' 
+                                        class="fad fa-2x pointer fa-thumbs-up ml-4 text-secondary"></i>
+                                    <i 
+                                        v-else
+                                        @click='likeNote(item.id)'
+                                        class="fad fa-2x pointer fa-thumbs-up ml-4 text-primary"></i>
+                                    <p 
+                                        v-if='item.total_like>0'
+                                        class="pl-2 bold-2 text-info">[[item.total_like]]</p>
+                                </div>
+                                <div class='d-flex justify-content-center pt-2'>
+                                    <div class="danger shadow-up">
+                                        <p 
+                                            style="font-size:14px" 
+                                            class="px-3 pb-0 mb-0 bold-1 text-secondary">[[ item.note ]]</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li 
+                                class="p-lg-1 m-0 mx-lg-2 me animate__animated animate__fadeInBottomLeft" 
+                                v-if="item.is_incoming">
+                                <div class="entete">
+                                    <i class="fas text-success fa-chevron-circle-down"></i>
+                                    <h3 class=" font-weight-bolder text-fuchsia">[[ item.dnis|phone_number ]]</h3>
+                                    <h3>[[ formatTime(item.timestamp) ]]</h3>
+                                    <span class="status blue"></span>
+                                    
+                                </div>
+                                <div v-if='item.reply' class="mt-2 message text-dark bg-wood" style="font-size: 14px">
+                                    <p class="m-2">[[ item.reply ]]</p>
+                                </div>
+                                <div v-if='item.image' class="pt-2">
+                                    <a 
+                                        :href="item.image.image" 
+                                        class="text-primary pr-2 pr-lg-3" download>
+                                        <i 
+                                            title="click to download" 
+                                            class="fas fa-download" 
+                                            style="font-size:20px"></i>
+                                    </a>
+                                    <a title="Click to open the image in a new tab" :href="item.image.image" target="_blank">
+                                        <img class="rounded incoming-hover" :src="item.image.image" width="300px" height="150px">
+                                    </a>                           
+                                </div>
+                                <div v-if="item.gif_url" class="pt-2">
+                                    <a 
+                                        :href="item.gif_url" 
+                                        class="text-primary pr-2 pr-lg-3" download>
+                                        <i 
+                                            title="click to download" 
+                                            class="fas fa-download" 
+                                            style="font-size:20px"></i>
+                                    </a>
+                                    <img class="rounded chat-gif" :src="item.gif_url">
+                                </div>
+                            </li>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <p 
+                            style="font-size:16px" 
+                            class="bold-1 text-primary text-center pt-2">Please wait ....</p>
+                    </div>
+                </ul>
+                <div v-else class="d-flex align-items-center chat-page-height-2">
+                    <div v-if='ani' class="text-center w-100">
+                        <h6 class="mb-3">&#x1F603; Please select a conversation or create new one</h6>
+                        <button @click='enableNewMsgInput()' class="btn btn-default bold-2">New Conversation</button>
+                    </div>
+                </div>
+                <div v-if='isEmoji' class="emoji border-1 pl-3">
+                    <div class="d-flex justify-content-between">
+                        <p class="bold-1">&#x1F603; Find your favourite Emoiji</p>
+                        <p @click="closeEmoji()" class="pointer"><i class="fas fa-times"></i></p>
+                    </div>
+                    <input 
+                        @keyup = 'searchEmojis()' 
+                        v-model = 'emojiSearch' 
+                        type = "text" 
+                        class = "form-control input-sm" 
+                        placeholder="Search emoji">
+                    <div class="mt-4 emoji-scroll">
+                        <span 
+                            @click = 'selectEmoji(item.character)' 
+                            v-for = 'item in emojis' 
+                            style = "font-size:20px" 
+                            class = "mx-1 pointer"> [[item.character]] </span>
+                    </div>
+                </div>
+                <div class="row mx-lg-3 mx-1 mt-2" v-if="chats.length>0 || newMsgInput">
+                    <div class="col-md-12 mb-0 pb-0">
+                        <span 
+                            @click = "shiftToMsg()"
+                            style="font-size:16px" 
+                            :class = "{'shaded-color': isMsg}" 
+                            class = "pb-0 mb-0 bold-2 pointer">Message
+                        </span>
+                        <span
+                            @click = 'shiftToNote()'
+                            v-if='!newMsgInput'
+                            style="font-size:16px" 
+                            :class = "{'shaded-color': isNote}" 
+                            class = "pb-0 mb-0 bold-2 ml-2 pointer">Note
+                        </span>
+                        <span class="bold-1 ml-2 text-warning" v-if='scheduledAt'> SMS Scheduled to be at [[ formatDate(scheduledAt)]]</span>
+                    </div>
+                    <div class="col-lg-12 col-sm-12 mt-2">
+                        <div v-if='selectedGif' class="d-flex flex-row" style="position: absolute; bottom:135px">
+                            <span class="mb-2">
+                                <img class="rounded" :src="selectedGif" width="150px" height="70px">
+                            </span>
+                            <span 
+                                @click = "cancelGif" 
+                                class="ml-lg-3 ml-1 pointer" 
+                                title="remove the gif">
+                                    <i class="fas fa-times"></i>
+                            </span>
+                        </div>
+                        <form method="post" class="form-group">
+                        {% csrf_token %}
+                            <div class="form-group">
+                                <textarea 
+                                    @keyup = 'autoHeight()' 
+                                    id = "message-box"
+                                    style="height: 50px;" 
+                                    v-model = 'message' 
+                                    name = 'msg' 
+                                    class = "form-control chat-textarea"
+                                    ref = 'textarea' 
+                                    placeholder = "Type message here" required></textarea>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <div class="">
+                                    <div v-if='!isNote'>
+                                        <p 
+                                            style = "letter-spacing: 3px;" 
+                                            class = "badge badge-secondary mr-2 pointer mx-lg-1" data-target = '#giphy-modal'
+                                            title="Find your favourite GIF" 
+                                            data-toggle='modal'>GIF</p>
+                                        <i 
+                                            data-target = '#template-modal'
+                                            title="Quick Reply" 
+                                            style="font-size:25px" 
+                                            data-toggle = 'modal'
+                                            @click="getTitles()"
+                                            :class = "[ showQResponse ? 'text-warning': 'text-secondary' ]" 
+                                            class="fad pointer fa-bolt mx-lg-2"></i>
+                                        <span 
+                                            @click='getEmojis()'
+                                            title="Find your favourite emoji" 
+                                            style="font-size:25px"  
+                                            class="pointer mx-2">&#x1F603;</span>
+
+                                        <i 
+                                            class = "fad fa-image pointer ml-lg-2"
+                                            title="Upload Media File" 
+                                            style="font-size:25px" 
+                                            data-target = '#media-modal' 
+                                            data-toggle = 'modal' 
+                                            title="Upload Media file"></i>
+                                        <span v-if='mms' class="ml-2">
+                                            <strong class="text-primary">File selected:</strong>
+                                            <!-- <span class="text-secondary">[[mms]]</span> -->
+                                        </span>
+                                    </div>
+                                    <div v-else class="pb-lg-5">
+                                        
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-row-reverse">
+                                    <div class="">
+                                        <button 
+                                            v-if='newMsgInput' 
+                                            @click.prevent = 'sendNewMessage()' 
+                                            name = "check" 
+                                            type = "submit"
+                                            class = "btn btn-primary btn-sm">Send New Msg
+                                        </button>
+                                        <button 
+                                            v-if='isMsg && !scheduledAt' 
+                                            @click.prevent = 'sendText()' 
+                                            name = "check" 
+                                            type = "submit"
+                                            id="send-message"
+                                            class = "btn btn-primary btn-sm">Send Message
+                                        </button>
+                                        <button 
+                                            v-if='scheduledAt' 
+                                            @click.prevent = 'sendText()' 
+                                            name = "check" 
+                                            type = "submit"
+                                            class = "btn btn-primary btn-sm">Schedule Message
+                                        </button>
+                                        <button 
+                                            v-if='isNote' 
+                                            @click.prevent = 'sendNote()' 
+                                            name = "check" 
+                                            type = "submit"
+                                            class = "btn btn-primary btn-sm">Send Note
+                                        </button>
+                                    </div>
+                                    <div v-if='!isNote' class="mr-3">
+                                        <i style="cursor:pointer;" class="fad fa-alarm-clock fa-2x ml-3" data-target='#schedule-modal' data-toggle='modal'  data-placement="top" title="Schedule message"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+{% block extra_js %}
+    <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://unpkg.com/moment@2.26.0/moment.js"></script>
+    <script src="https://unpkg.com/vue-emoji-picker/dist/vue-emoji-picker.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script type="text/javascript" src="{% static 'vue/main.js' %}"></script>
+    <script type="text/javascript" src="{% static 'vue/side-conversation.js' %}"></script>
+    <script type="text/javascript">
+        var el = document.querySelector('.more');
+        var btn = el.querySelector('.more-btn');
+        var menu = el.querySelector('.more-menu');
+        var visible = false;
+
+        function showMenu(e) {
+            e.preventDefault();
+            console.log("show")
+            if (visible){
+                el.classList.remove('show-more-menu');
+                menu.setAttribute('aria-hidden', true);
+                document.removeEventListener('mousedown', hideMenu);
+                visible = false
+
+            }
+            else if (!visible) {
+                visible = true;
+                el.classList.add('show-more-menu');
+                menu.setAttribute('aria-hidden', false);
+                // document.addEventListener('mousedown', hideMenu, false);
+            }
+        }
+
+        function hideMenu(e) {
+            if (btn.contains(e.target)) {
+                return;
+            }
+            if (visible) {
+                visible = false;
+                el.classList.remove('show-more-menu');
+                menu.setAttribute('aria-hidden', true);
+                document.removeEventListener('mousedown', hideMenu);
+            }
+        }
+
+        btn.addEventListener('click', showMenu, false);
+    </script>
+{% endblock %}

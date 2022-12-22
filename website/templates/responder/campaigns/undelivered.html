@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block title %} Undelivered Numbers {% endblock %}
+{% block content %}
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-lg-4 offset-lg-1 animate__animated animate__lightSpeedInLeft">
+                    <div class="card shadow">
+                        <div class="card-body row ml-2 scale">
+                            <i class="fas fa-sms fa-2x text-primary"></i>
+                            <h1 class="ml-3 title-gradient"><span>Undelivered SMS</span></h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7 animate__animated animate__lightSpeedInRight">
+                    <ol class="breadcrumb float-sm-right bold-2">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item text-warning">Undelivered</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row" id="select_all_boxes">
+                <div class="col-lg-10 offset-lg-1">
+                    <div class="card table-responsive p-md-3 shadow-1">
+                        <div class="card-body">
+                            <form method="POST">
+                            {% csrf_token %}
+                              <div class="mb-2">
+                                  <button type="submit" class="btn btn-danger btn-sm" name="check" value="delete">delete</button>
+                              </div>
+                              <table class="table table-hover animate__animated animate__fadeInUp">
+                                  <thead>
+                                        <tr>
+                                            <th>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="select-all">
+                                                    <label class="form-check-label ml-1">All</label>
+                                                </div>
+                                            </th>
+                                             <th scope="col">#</th>
+                                             <th scope="col">To</th>
+                                             <th scope="col">From</th>
+                                             <th scope="col">Code</th>
+                                             <th scope="col">Status</th>
+                                        </tr>
+                                  </thead>
+                                  <tbody>
+                                    {% for item in pages %}
+                                        <tr>
+                                            <td>
+                                                <div class="form-check">
+                                                    <input name="sms_id" value="{{ item.id }}" type="checkbox" class="form-check-input">
+                                                </div> 
+                                            </td>
+                                            <td scope="row">{{ forloop.counter }}</td>
+                                            {% if is_dnis %}
+                                              <td>{{ item.dnis }}</td>
+                                            {% else %}
+                                              <td>{{ item.dnis|truncatechars:9 }}</td>
+                                            {% endif %}
+                                            <td> {{ item.ani }} </td>
+                                            <td style="cursor:pointer;" data-toggle="tooltip" title="{{ item.error }}">{{ item.error|truncatechars:15 }}</td>
+                                            <td class="text-primary">{{ item.del_status }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                  </tbody>
+                              </table>
+                        </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+    </section>
+    {% if pages.has_other_pages %}
+        <section class="article-pagination">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-12">
+                <nav aria-label="Page navigation example">
+                  <ul class="pagination justify-content-center">
+                    {% if pages.has_previous %}
+                      <li class="page-item">
+                        <a class="" href="?page={{ pages.previous_page_number }}" tabindex="-1">
+                          <i class="far fa-arrow-alt-circle-left fa-3x"></i>
+                        </a>
+                      </li>
+                    {% else %}
+                      <li class="page-item">
+                        <a class="" href="" tabindex="-1">
+                          <i class=" disabled far fa-arrow-alt-circle-left fa-3x"></i>
+                        </a>
+                      </li>
+                    {% endif %}
+                    {% for page in pages.paginator.page_range %}
+                      {% if pages.number == page %}     
+                        <!-- Current page -->
+                        <li class="page-item">
+                          <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+                        </li>
+                        <!-- end -->
+                      {% elif page > pages.number|add:'-3' and page < pages.number|add:'3' %}
+                          <li class="page-item">
+                            <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+                          </li>
+                      {% endif %}
+                    {% endfor %}
+                    {% if pages.has_next %}
+                      <li class="page-item">
+                        <a class="" href="?page={{ pages.next_page_number }}">
+                          <i class="far fa-arrow-alt-circle-right fa-3x"></i>
+                        </a>
+                      </li>
+                    {% endif %}
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </section>
+    {% endif %}
+    
+    <!-- /.content -->
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    $(document).ready(function(){
+      $('[data-toggle="tooltip"]').tooltip();   
+    });
+</script>
+<script>
+
+$('#select-all').click(function() {
+
+  var _this = this;
+  $('#select_all_boxes').find('input[name="sms_id"').each(function() {
+   
+    if ($(_this).is(':checked')) {
+      $(this).prop('checked', true);
+    } else {
+      $(this).prop('checked', false);
+    }
+  });
+});
+</script>
+{% endblock %}

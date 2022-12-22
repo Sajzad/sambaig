@@ -1,0 +1,375 @@
+{% load static %}
+{% load head_tags %}
+
+<div id="aside">
+    <div id="notification" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <h5 class="modal-title sweet-text font-weight-bold letter-spacing text-uppercase">Notifications</h5>
+            </div>
+            <div class="modal-body">
+            {% if request.user.is_authenticated %}
+                {% if default %}
+                    <div class="alert alert-light">
+                        <p>{{ default.user_default }}</p>
+                    </div>
+                {% endif %}
+                {% if messages %}
+                    {% for item in messages %}
+                        <div class="alert alert-light">
+                            <p>{{ item.notification }}</p>
+                            <p class="float-right font-weight-bold" style="font-size:11px">{{ item.timestamp }}</p>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% if not default and not messages %}
+                    <div class="alert alert-light">
+                        <p>No notification to show</p>                
+                    </div>
+                {% endif %}
+            {% else %}
+                {% if default %}
+                    <div class="alert alert-light">
+                        <p>{{ default.visitor_default }}</p>
+                    </div>
+                {% endif %}
+            {% endif %}
+          </div>
+          <div class="modal-footer">
+            <button id="close-modal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>   
+    <!-- facebook modal -->
+    <div id="facebook-list" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content card px-5 py-4">
+            <div class="modal-header text-center">
+                <h5 class="modal-title sweet-text font-weight-bold letter-spacing text-uppercase">Add List</h5>
+            </div>
+            <div class="modal-body text-dark">
+                <form method="POST" action="{% url 'facebook:fb_ads' %}">
+                {% csrf_token %}
+                    <div class="form-group">
+                        <label>Form Id </label>
+                        <input type="text" placeholder="Form Id" name="form_id" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Form Name</label>
+                        <input type="text" placeholder="Form Name" name="form_name" class="form-control" required>
+                    </div>
+                    <div class="float-right">
+                        <button id="close-modal" type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                        <button type="submit" name="check" value="create-fb-form" class="btn btn-sm btn-default">Create</button>
+                    </div>
+                </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <aside class="aside hidden" id="aside">
+        <!-- Sidebar -->
+        <div class="sidebar hidden text-oswald m-0 p-0">
+            <div class="side-img pt-5">
+                <div class="user-panel d-flex align-items-center">
+                	{% if request.user.is_authenticated %}
+        	            <div class="image text-white">
+        	                <img src="{% static 'assets/dist/img/profile.png' %}" class="text-white" alt="User Image">
+        	            </div>
+        	        {% endif %}
+                    {% if request.user.is_authenticated %}
+        	            <div class="h5 text-spacing">
+        	                <a href="{% url 'base:home' %}" class="font-quicksand text-white pl-2">{{ request.user.username }}</a>
+        	            </div>
+        	        {% endif %}
+                </div>
+                {% if not request.user.is_superuser %}
+                    <div class="pt-3 text-white">
+                        <p class="pl-4 mb-0" @click='pn()'>Primary Number</p>
+                            {% for item in user_anis %}
+                                <p class="pl-4 mt-0" @click='pn()' v-model='primary_number'>. {{ item.ani.ani|phone_number }}</p>
+                            {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <!-- Sidebar Menu -->
+            <nav class="mt-2" id="sm-menu">
+                <ul class="nav nav-pills nav-sidebar sm-font flex-column" data-widget="treeview" role="menu"
+                    data-accordion="false">
+                    <li class="nav-item animate__animated">
+                        <a href="{% url 'base:home' %}" class="nav-link translatex">
+                            <i class="nav-icon text-white fas fa-tachometer-alt"></i>
+                            <p>
+                                Dashboard
+                            </p>
+                        </a>
+                    </li>
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item d-flex" id="campaigns">
+                            <a href="{% url 'responder:side-conversations' %}" class="nav-link translatex">
+                                <i class="nav-icon fad text-white fa-comments-alt"></i>
+                                <p>
+                                    Inbox
+                                </p>
+                                <span class="text-white ml-2 my-1 p-1 rounded-pill bg-white">{{unread_count}}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" id="campaigns">
+                            <a href="{% url 'responder:bulk-sms' %}" class="nav-link translatex">
+                                <i class="nav-icon fad fa-tasks text-white"></i>
+                                <p>
+                                    Bulk SMS
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item" id="campaigns">
+                            <a href="{% url 'responder:auto-responders' %}" class="nav-link translatex">
+                                <i class="nav-icon fad fa-repeat text-white"></i>
+                                <p>
+                                    Drip Automation
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item" id="campaigns">
+                            <a href="{% url 'responder:keywords' %}" class="nav-link translatex">
+                                <i class="nav-icon fad fa-key text-white"></i>
+                                <p>
+                                    Keywords
+                                </p>
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item d-flex">
+                        <a href="{% url 'facebook:fb_ads' %}" class="nav-link translatex">
+                            <i class="nav-icon text-white far fa-user"></i>
+                            <p>
+                                Contact
+                            </p>
+                            <!-- <span class="text-white mt-2" style="cursor:pointer;" data-toggle="modal" data-target="#contact">
+                                <i class="fas text-white fa-plus pl-4"></i>
+                            </span> -->
+                        </a>
+                    </li>
+                    {% if request.user.is_superuser %}
+                        <li class="nav-item has-treeview">
+                            <a href="{% url 'base:super_admin' %}" class="nav-link translatex" style="cursor: pointer;">
+                                <i class="nav-icon text-white fas fa-chart-line"></i>
+                                <p>
+                                    Access Control
+                                </p>
+                            </a>
+                        </li>
+    	            {% endif %}
+                   <!--  <li class="nav-item">
+                        <a href="{% url 'base:support' %}" class="nav-link translatex">
+                            <i class=""></i>
+                            <i class="fad fa-comment-alt-check nav-icon text-white"></i>
+                            <p>
+                                Support
+                            </p>
+                        </a>
+                    </li>    -->
+                    {% if request.user.is_superuser %}
+                        <li class="nav-item">
+                            <a href="{% url 'base:gateways' %}" class="nav-link translatex">
+                                <i class="fad fa-dungeon nav-icon text-white"></i>
+                                <p>
+                                    SMS Gateways
+                                </p>
+                            </a>
+                        </li>
+                    {% endif %}             
+
+                    <li class="nav-item mt-5 text-center">
+                    	{% if not request.user.is_authenticated %}
+                        	<a href="{% url 'base:signin' %}" class="btn btn-outline-info mr-2 translatex">Login</a>
+                        	<a href="{% url 'base:signup' %}" class="btn btn-outline-info translatex">Signup</a>
+                        {% endif %}
+                    </li>
+                </ul>
+            </nav>
+            <!-- sidebar-menu -->
+        </div>
+        <!-- sidebar -->
+    </aside>
+    <!-- Main Sidebar Container -->
+    <div class="header-main d-flex justify-content-between">
+        <div class="row">
+            <a class="nav-link active m-3 rounded" id="hamburger" data-widget="pushmenu" style="cursor:pointer;" role="button">
+                <i class="fas fa-align-justify fa-1x" id="hamburger"></i>
+            </a>
+            <a href="{% url 'base:home' %}" class="sm-none text-uppercase h3 pl-xl-4 text-success pt-3 bold-3">
+                <img class="logo" src="{% static 'images/logo.png' %}">
+            </a>
+        </div>
+        <div class="pt-1 text-white">
+            {% if request.user.is_superuser %}
+               <div class="dropdown">
+                    <p 
+                        class="bold-1 pb-0 mb-1 text-oswald text-center"
+                        style="letter-spacing:1px;">
+                            {% if pn %}
+                               {{pn.ani.name}}
+                            {% endif %}
+                    </p>
+                    <button 
+                        style="background-color:transparent; min-width: 230px; letter-spacing:1px" 
+                        class="bold-1 border-0 btn btn-primary btn-sm dropdown-toggle text-center text-primary"
+                        type="button" 
+                        data-toggle="dropdown">
+                            {% if pn %}
+                               {{pn.ani.ani|phone_number}}
+                            {% else %}
+                                Set Primary Number
+                            {% endif %}
+                        <span class="caret"></span></button>
+                            <ul 
+                                class="dropdown-menu hidden p-0 m-0 w-100" 
+                                style="height: 200px; min-width: 22rem; overflow-y:scroll!important ;">
+                                {% for item in anis %}
+                                    <li 
+                                        @click="pn({{item.id}})"
+                                        style="letter-spacing:1px" 
+                                        class="pl-1 p-2 hover-white pointer border-bottom">
+                                        {{item.ani|phone_number}} - {{item.name}}
+                                        <span class="bg-secondary rounded-pill p-1 bold-1">{{item.not_responded}}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                </div>
+            {% endif %}
+        </div>
+        {% if request.user.is_authenticated %}
+            <div class="mr-lg-2 mr-2 pt-2">
+                <button v-if='!is_dropDown' @click='activateDropdown()' class="btn btn-warning px-3 py-0 m-0">
+                    <i class="fas fa-angle-down"></i>
+                </button>
+                <button v-if='is_dropDown' @click='deactivateDropdown()' class="btn btn-warning px-3 py-0 m-0">
+                    <i class="fas fa-angle-up"></i>
+                </button>
+            </div>
+        {% endif %}
+    </div>
+    {% if request.user.is_authenticated %}
+        <div v-if='is_dropDown' class="sidemenu-dropdown">
+            <ul 
+                class="hidden p-0 m-0 w-100 text-white text-center" 
+                style="height: 200px; min-width: 15rem;;">
+                {% if request.user.is_superuser %}
+                    <li class="pl-2 p-2 hover-white pointer text-secondary bold-1 border-bottom">
+                        <a 
+                            target="_blank" 
+                            class="text-primary" 
+                            href="/way_to_superadmin/">Admin
+                        </a>
+                    </li>
+                {% endif %}   
+                <li class="pl-2 p-2 hover-white pointer text-secondary bold-1 border-bottom">
+                    <a class="text-primary" href="{% url 'responder:undelivered-messages' %}">Undelivered SMS
+                        <span class="badge badge-secondary pointer px-2 py-1 ml-2">{% undelivered_messages user=request.user %}</span>
+                    </a>
+                </li>            
+                <li class="pl-2 p-2 hover-white pointer text-secondary bold-1 border-bottom">
+                    <a class="text-primary" href="{% url 'responder:undelivered-messages' %}"> Unseen SMS
+                        <span class="badge badge-warning text-white pointer px-2 py-1 ml-2">
+                             {% unseen_msgs user=request.user %}
+                        </span>
+                    </a>
+                </li>               
+                <li class="pl-2 p-2 hover-white pointer text-secondary bold-1 border-bottom">
+                    {% if request.user.is_authenticated and not request.session.user == "superuser" %}
+                        <a href="{% url 'account_logout' %}" class="text-primary ml-1 mr-2">Logout</a>
+                    {% elif request.session.user == "superuser" %}
+                        <form method="post" action="{% url 'base:super_admin' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="user" value="{{ request.session.username }}">
+                            <button type="submit" name="check" value="back_to_admin" class="btn btn btn-danger btn-sm ml-1 mr-2">Back</button>
+                            
+                        </form>
+                    {% endif %}
+                </li>
+                <li class="pl-2 p-2 hover-white pointer text-secondary bold-1 border-bottom">
+                        <span class="badge badge-warning text-white pointer px-2 py-1 ml-2">
+                            {% now "SHORT_DATETIME_FORMAT" %}
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </div> 
+    {% endif %}
+</div>
+<script src="{% static 'vue/aside.js' %}"></script>
+
+<script>
+    sm_menu = document.querySelector(".aside");
+    hamburger = document.querySelector("#hamburger");
+    window.addEventListener("click", (e)=>{
+        if (document.querySelector(".aside").contains(e.target)){
+
+        }else{
+            if (e.target.id ==="hamburger"){
+                navshow();
+            }
+            else if (document.querySelector(".aside").classList.contains("open")){
+                // console.log('yes')
+                sm_menu.classList.toggle("open");
+
+            }
+        }
+    });
+    document.getElementById('notification-message').addEventListener("click", function(){
+        if (document.getElementById("aside").classList.contains("open")){
+            document.getElementById("aside").classList.toggle("open");
+        }
+    });
+    document.getElementById("close-modal").addEventListener("click", function(){
+        console.log("dsfsdf")
+        document.getElementById("aside").classList.add("open");
+       if (document.getElementById("aside").classList.contains("open")){
+            document.getElementById("aside").classList.toggle("open");
+        }else{
+            document.getElementById("aside").classList.add("open");
+        } 
+    });
+    function navshow(){
+        // sm_menu.classList.remove("aside");
+        sm_menu.classList.toggle("open");
+
+    };
+
+    access_control = document.querySelector(".has-treeview")
+    access_control.addEventListener("click",()=>{
+        right = document.querySelector(".right");
+        if (right.classList.contains("fa-angle-left")){
+            right.classList.remove("fa-angle-left");
+            right.classList.add("fa-angle-down");
+            tree_view = document.querySelector(".nav-treeview");
+            tree_view.style.display="block";
+        }else{
+            right.classList.remove("fa-angle-down");
+            right.classList.add("fa-angle-left");
+            tree_view = document.querySelector(".nav-treeview");
+            tree_view.style.display="none";
+        }
+
+    });
+
+</script>
+<script type="text/javascript">
+    var current = location.href;
+    var menu = document.getElementsByClassName("nav-link");
+    for (let i = 0; i<menu.length; i++){
+        if(menu[i].href === current){
+            menu[i].classList.add("active-aside");
+            break;
+        }
+    }
+</script>
+<script type="text/javascript">
+    $('select').selectpicker();
+</script>
+

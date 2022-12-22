@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}SMS Gateways{% endblock %}
+{% load static %}
+{% block content %}
+<div class="content-wrapper" id="app">
+	<div class="container-fluid">
+		<div class="col-md-6 mx-auto pt-4">
+            <div class="card px-lg-5 py-lg-4 p-1">
+                <div class="card-title">
+                    <p class="h4 sweet-text bold-2">Update Number</p>
+                </div>
+                <div class="card-body">
+                    <div class="">
+                        <form method="POST">
+                        {% csrf_token %}
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" name="name" value="{{ani.name}}" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Number</label>
+                                <input type="tel" value="{{ani.ani}}" name="phone" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Select Gateway *</label>
+                                <select name="gateway_id" class="form-control" required>
+                                    <option value="{{ani.gateway_id}}" selected>{{ani.gateway.name}}</option>
+                                    {% for item in gateways %}
+                                        <option value="{{item.id}}">{{item.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div> 
+                            <div class="form-group">
+                                <label>Select User *</label>
+                                <select data-live-search=true name="admin_id" class="form-control" required multiple>
+                                    {% for item in assigned_anis %}
+                                        <option value="{{item.admin_id}}" selected>{{ item.admin }}</option>
+                                    {% endfor %}
+                                    {% for item in users %}
+                                        <option value="{{item.id}}">{{item.admin}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="float-right pt-3">
+                                <button type="submit" class="btn btn-primary ml-2" name='check' value="edit-ani">Update</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+    <script type="text/javascript">
+        $('select').selectpicker();
+    </script>
+{% endblock %}

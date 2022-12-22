@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Member{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+	{% if request.user.is_superuser %}
+	    <div class="content-header">
+	        <div class="container-fluid">
+				{% include 'base/ad-partial.html' %}
+	            <div class="row mb-2">
+	                <div class="col-sm-6">
+	                		<h4>User Panel</h4>
+	                </div>
+	            </div>
+	            <div class="row px-lg-3 pt-3">
+					<div class="col-md-12 col-sm-12 col-lg-7 offset-lg-2">
+						<div class="card card-dark">
+							<div class="card-header">
+								<h3 class="card-title">Add Users</h3>
+							</div>
+							<!-- /.card-header -->
+							<div class="card-body">
+								<div class="form-group">
+									<form method="POST" class="d-flex justify-content-between">
+										{% csrf_token %}
+										<input type="text" class="form-control" placeholder="Enter User Name/Email" name="user_search">
+										<button type="submit" class="ml-3 px-3 btn btn-warning btn-sm" name="check"
+											value="search_users">Search</button>
+									</form>
+								</div>
+								{% if count %}
+									<div class="card-header">
+										<h5> {{ count }} search results found</h5>
+									</div>
+								{% endif %}
+								{% if search_results %}
+									<table class="table table-hover text-center">
+										<thead>
+											<tr>
+												<th>#</th>
+												<th>User</th>
+												<th>Email</th>
+												<th>Action</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for item in search_results %}
+												<tr>
+													<td>{{ forloop.counter }}</td>
+													<td>{{ item.username }} </td>
+													<td>{{ item.email }}</td>
+													<td>
+														<form method="POST">
+															{% csrf_token %}
+															<input type="hidden" value="{{ item.username }}" name="user_name">
+															<button class="btn btn-primary btn-sm" name="check" value="add">add</button>
+															<button class="btn btn-danger btn-sm" name="check" value="remove">Remove</button>
+														</form>
+													</td>
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+	            </div>
+	        </div>
+	    </div>
+	{% endif %}   
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    {% if alert %}
+        const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'success',
+                title: '{{ alert }}'
+
+            })
+    {% elif error %}
+        const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'error',
+                title: '{{ error }}'
+
+            })
+    {% endif %}
+
+</script>
+{% endblock %}
+{% endblock %}
