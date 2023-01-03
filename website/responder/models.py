@@ -246,7 +246,7 @@ class InOutSms(models.Model):
 	ani = models.ForeignKey(Ani, on_delete=models.CASCADE, blank=True, null=True)
 	type = models.CharField(max_length=15, choices=choices, default='sms')
 	dnis = models.CharField(max_length=20, null=True, blank=True)
-	gif_url = models.CharField(max_length=250, null=True, blank=True)
+	gif_url = models.CharField(max_length=500, null=True, blank=True)
 	sent = models.TextField( null=True, blank=True) 
 	reply = models.TextField( null=True, blank=True)
 	note = models.TextField( null=True, blank=True)

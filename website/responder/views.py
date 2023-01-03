@@ -1388,76 +1388,52 @@ def side_conversations_view(request):
 						gateway = ani_objs[0].gateway.gateway.gateway
 
 						admin_id = get_object_or_404(Admin, admin=request.user).id
+
 						if image_id or gif_url:
 							is_mms = True
 						else:
 							is_mms = False
 
-						if scheduled_at:
-							InOutSms.objects.create(
-								admin_id = admin_id, 
-								ani_id = ani_id,
-								image_id = image_id,
-								gif_url = gif_url,
-								dnis = dnis, 
-								sent = message,
-								is_scheduled = True,
-								is_mms = is_mms,
-								scheduled_at = scheduled_at,
-								message_id = msg_id)
-						else:
-							auth = AddGateway.objects.filter(id=gateway_id).values()[0]
-							if image_id or gif_url:
-								urls = []
-								is_mms = True
-								if image_id:
-									url = Image.objects.filter(id=image_id)[0].image.url
-									site = Site.objects.all()[0].domain
-									url = site + url
-									urls.append(url)
-								if gif_url:
-									urls.append(gif_url)
-								
-								msg_id, error, code, status = send_fax(auth, gateway, ani, dnis, message, urls)
-							else:
-								pass
-								# r = send_sms(auth, gateway, ani, dnis, message)
-							is_lead = InOutSms.objects.filter(ani_id=ani_id, dnis__contains=dnis.replace("+","")).exists()
+						auth = AddGateway.objects.filter(id=gateway_id).values()[0]
+
+						if image_id or gif_url:
+							urls = []
+							is_mms = True
+
+							if image_id:
+								url = Image.objects.filter(id=image_id)[0].image.url
+								site = Site.objects.all()[0].domain
+								url = site + url
+								urls.append(url)
 							
-							if is_lead:
-								is_lead = False
-							else:
-								is_lead = True
+							msg_id, error, code, status = send_fax(auth, gateway, ani, dnis, message, urls)
+						else:
+							pass
+							# r = send_sms(auth, gateway, ani, dnis, message)
+						is_lead = InOutSms.objects.filter(ani_id=ani_id, dnis__contains=dnis.replace("+","")).exists()
+						
+						if is_lead:
+							is_lead = False
+						else:
+							is_lead = True
 
-							sms_obj = InOutSms.objects.create(
-								admin_id=admin_id,
-								image_id=image_id,
-								gif_url=gif_url,
-								is_mms=is_mms, 
-								ani_id=ani_id, 
-								dnis=dnis, 
-								sent=message,
-								status=status,
-								is_lead=is_lead,
-								message_id=msg_id)
+						sms_obj = InOutSms.objects.create(
+							admin_id=admin_id,
+							image_id=image_id,
+							gif_url=gif_url,
+							is_mms=is_mms, 
+							ani_id=ani_id, 
+							dnis=dnis, 
+							sent=message,
+							del_status=status,
+							is_lead=is_lead,
+							type='fax',
+							message_id=msg_id)
 
-							if not msg_id:
-								sms_obj.error = error
-								sms_obj.del_status = 'undelivered'
-								sms_obj.save()
-							# else:
-							# 	InOutSms.objects.create(
-							# 		admin_id = admin_id, 
-							# 		image_id = image_id,
-							# 		gif_url = gif_url,
-							# 		error = error,
-							# 		del_status = 'undelivered', 
-							# 		ani_id = ani_id, 
-							# 		dnis = dnis,
-							# 		is_mms = is_mms, 
-							# 		sent = message,
-							# 		is_lead = is_lead,
-							# 		message_id = msg_id)
+						if not msg_id:
+							sms_obj.error = error
+							sms_obj.del_status = 'undelivered'
+							sms_obj.save()
 
 					if request.user.is_superuser:
 						chats = InOutSms.objects.filter(dnis__contains=dnis.replace("+", "").strip()).order_by("id")
@@ -1540,8 +1516,9 @@ def side_conversations_view(request):
 							ani_id=ani_id, 
 							dnis=dnis, 
 							sent=message,
-							status=status,
+							del_status=status,
 							is_lead=is_lead,
+							type='fax',
 							message_id=fax_id)
 						
 						if error:

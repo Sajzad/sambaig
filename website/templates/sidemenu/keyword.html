@@ -103,11 +103,13 @@
 							                				<td class="m-0 p-0">
 							                					<span class="d-flex">
 							                						<i 
-							                							@click='getQResponse(resp.id)' class="fad fa-pen pointer hover-white p-1"
+							                							@click='getQResponse(resp.id)'
+																		class="fad fa-pen pointer hover-white p-1"
 							                							data-target="#edit_response"
 							                							data-toggle="modal"></i>
 									                  				<i 
-									                  					@click='deleteResponse(resp.id)' class="fad fa-trash-alt pointer hover-white px-2 py-1"></i>
+									                  					@click='deleteResponse(resp.id)'
+																		class="fad fa-trash-alt pointer hover-white px-2 py-1"></i>
 									                  			</span>
 							                				</td>
 							                			</tr>
@@ -122,9 +124,15 @@
 							    </div>
 							  </div>
                         </div>
-                        <a @click="getTitles()" data-target='#quick-response-modal' data-toggle='modal' class="bold-1 pointer text-primary">Create new response +</a>
+                        <a @click="getTitles()"
+							data-target='#quick-response-modal'
+							data-toggle='modal'
+							class="bold-1 pointer text-primary">Create new response +</a>
                         <div class="float-right mt-3">
-                            <button type="button" class="btn btn-danger btn-sm bold-1" data-dismiss="modal">Close</button>
+                            <button
+								type="button"
+								class="btn btn-danger btn-sm bold-1"
+								data-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
@@ -142,11 +150,20 @@
                                 <form @submit.prevent='editQResponse()' class="form-group" method="POST" enctype="multipart/form-data">
                                  {% csrf_token %}
                                     <div class="form-group">
-                                        <input v-model='title.title' type="text" class="form-control">
+                                        <input
+											v-model='title.title'
+											type="text"
+											class="form-control">
                                     </div>
                                     <div class="float-right mt-3">
-                                        <button type="button" class="btn btn-danger btn-sm bold-1" data-dismiss="modal">Close</button>
-                                        <button @click.prevent='editQTitle(title.id)' type="submit" class="btn btn-default btn-sm bold-1">Save Changes</button>
+                                        <button
+											type="button"
+											class="btn btn-danger btn-sm bold-1"
+											data-dismiss="modal">Close</button>
+                                        <button
+											@click.prevent='editQTitle(title.id)'
+											type="submit"
+											class="btn btn-default btn-sm bold-1">Save Changes</button>
                                     </div>
                                 </form>
                             </div>

@@ -282,7 +282,16 @@
                             <div class="row">
                                 <div class="col-md-4 p-2 form-check" v-for='item in images'>
                                     <input v-model='mms' name="mms" :value="item.id" type="radio" class="form-check-input">
-                                    <img class="rounded" :src="'/media/'+item.image" width="150px" height="80px">
+                                    <img
+                                        v-if="item.image.endsWith('pdf')"
+                                        class="rounded"
+                                        src="/static/images/pdf.png"
+                                        width="100px" height="70px">
+                                    <img
+                                        v-else
+                                        class="rounded"
+                                        src="/static/images/docs.png"
+                                        width="100px" height="70px">
                                 </div>
                             </div>
                         </div>
@@ -499,14 +508,14 @@
                     class="p-0 m-0 p-lg-2 scroll-y border-bottom chat-page-height">
 
                     <!-- <pre style="max-height: 400px;">[[emojis]]</pre> -->
-                    <!-- <pre style="max-height: 200px;">[[chats]]</pre> -->
+                    {% comment %} <pre style="max-height: 200px;">[[chats]]</pre> {% endcomment %}
                     <!-- <pre style="max-height: 200px;">[[leads]]</pre> -->
                     <div v-if='!messageLoading'>
                         <div v-for="item in chats">
-                            <li class="p-lg-1 m-0 mx-lg-2 you animate__animated animate__fadeInBottomRight" v-if="item.sent">
+                            <li class="p-lg-1 m-0 mx-lg-2 you animate__animated animate__fadeInBottomRight" v-if="item.image">
                                 <div 
                                     :class = "{'mt-0': item.image}"
-                                    v-if = 'item.sent' 
+                                    v-if = 'item.image' 
                                     class="entete mx-2">
                                     <span class="status green"></span>
                                     <h2>[[ ani|phone_number ]]</h2>
@@ -521,18 +530,28 @@
                                     <h3 class="text-secondary bold-2" v-if='item.is_bulk'>yet to be sent(sent in bulk)</h3>
                                 </div>
                                 <div v-if='item.image' class="pt-2">
-                                    <a title="Click to open the image in a new tab" :href="item.image.image" target="_blank">
-                                        <img 
-                                            class="rounded pt-2 chat-img outbound-hover" 
-                                            :src="item.image.image">
+                                    <a 
+                                        title="Click to open the image in a new tab"
+                                        :href="item.image.image" target="_blank">
+                                        {% comment %} <img 
+                                            class="rounded pt-2 chat-img outbound-hover"
+                                            :src="item.image.image"> {% endcomment %}
+                                        <img
+                                            v-if="item.image.image.endsWith('pdf')"
+                                            class="rounded pt-2 chat-img outbound-hover"
+                                            src="/static/images/pdf.png">
+                                        <img
+                                            v-else
+                                            class="rounded pt-2 chat-img outbound-hover"
+                                            src="/static/images/docs.png">
                                     </a>
                                     <a 
                                         :href="item.image.image"
                                         style="z-index: -100;" 
                                         class="text-primary pl-2 pl-lg-3" download>
                                         <i 
-                                            title="click to download" 
-                                            class="fas fa-download" 
+                                            title="click to download"
+                                            class="fas fa-download"
                                             style="font-size:20px"></i>
                                     </a>
                                 </div>
@@ -612,6 +631,21 @@
                                 </div>
                                 <div v-if="item.gif_url" class="pt-2">
                                     <a 
+                                        title="Click to open the image in a new tab"
+                                        :href="item.gif_url" target="_blank">
+                                        {% comment %} <img 
+                                            class="rounded pt-2 chat-img outbound-hover"
+                                            :src="item.image.image"> {% endcomment %}
+                                        <img
+                                            v-if="item.gif_url.endsWith('pdf')"
+                                            class="rounded pt-2 chat-img incoming-hover"
+                                            src="/static/images/pdf.png">
+                                        <img
+                                            v-else
+                                            class="rounded pt-2 chat-img incoming-hover"
+                                            src="/static/images/docs.png">
+                                    </a>
+                                    <a 
                                         :href="item.gif_url" 
                                         class="text-primary pr-2 pr-lg-3" download>
                                         <i 
@@ -619,7 +653,6 @@
                                             class="fas fa-download" 
                                             style="font-size:20px"></i>
                                     </a>
-                                    <img class="rounded chat-gif" :src="item.gif_url">
                                 </div>
                             </li>
                         </div>

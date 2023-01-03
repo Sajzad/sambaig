@@ -8,6 +8,4 @@ urlpatterns = [
     
     path('fax/incoming', views.signalwire_fax_incoming_view, name='signal_fax_incoming'),
     path('sms/incoming', views.signalwire_sms_incoming_view, name='signal_sms_incoming'),
-    # path('dlr', views.signalwire_dlr_view, name='signal_dlr'),
-
 ]

@@ -10,7 +10,7 @@ DEBUG = True
 # SECRET_KEY = os.environ["SECRET_KEY"]
 SECRET_KEY='zd&sdao_m16cgkyd-_n1ff-8lx*!b9g81olr_^qfp7jk#lavca'
 
-ALLOWED_HOSTS = ["3da8-103-83-240-156.ngrok.io", ".3da8-103-83-240-156.ngrok.io", "127.0.0.1"]
+ALLOWED_HOSTS = ["7a94-103-85-158-33.ngrok.io", ".7a94-103-85-158-33.ngrok.io", "127.0.0.1"]
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 

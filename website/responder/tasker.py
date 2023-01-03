@@ -40,7 +40,7 @@ def get_dnis(dnis):
 	return dnis
 
 def send_fax(auth, gateway, ani, dnis, message, urls):
-	print('1')
+	print('fax data', ani, dnis)
 	try:
 		error = None
 		code = None
@@ -49,7 +49,7 @@ def send_fax(auth, gateway, ani, dnis, message, urls):
 
 		if "telnyx" in gateway.lower():
 			TELNYX_FAX_URL = "https://api.telnyx.com/v2/faxes"
-			TELNYX_API_KEY = os.getenv("TELNYX_API_KEY")
+			TELNYX_API_KEY = auth['tel_api'].strip()
 		
 			headers = {
 				'Authorization': f"Bearer {TELNYX_API_KEY}"
@@ -57,14 +57,19 @@ def send_fax(auth, gateway, ani, dnis, message, urls):
 
 			data = {
 				"media_url": urls[0],
-				"connection_id": os.getenv.get("TELNYX_CONNECTION_ID"),
+				"connection_id": os.getenv("TELNYX_CONNECTION_ID"),
 				"to": dnis,
-				"from": dnis,
+				"from": ani,
 			}
 
 			res = requests.post('https://api.telnyx.com/v2/faxes', headers=headers, data=data)
 
-			print('telnyx response',res)
+			print('telnyx response',res.status_code, res.text)
+			fax_id = res.json()['data']['id']
+			print('fax_id', fax_id)
+			if fax_id:
+				code = 200
+				status = "pending"
 
 		elif "signalwire" in gateway.lower():
 			print('fax is sending')

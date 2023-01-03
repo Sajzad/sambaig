@@ -99,7 +99,8 @@ def signalwire_fax_incoming_view(request):
         ani = request.POST["To"]
         msg_id = request.POST["FaxSid"]
         dnis = request.POST["From"]
-        faxes = request.POST["MediaUrl"]
+        fax = request.POST["MediaUrl"]
+        print('faxes', fax)
 
         ani_objs = Ani.objects.filter(ani__contains=ani.strip())
         if ani_objs:
@@ -132,19 +133,19 @@ def signalwire_fax_incoming_view(request):
             to_reply = False
         else:
             to_reply = True
-            
-        for url in faxes:
-            sms_obj = InOutSms.objects.create(
-                gateway = telnyx_obj,
-                type='fax',
-                admin_id = admin_id, 
-                dnis = dnis, 
-                gif_url = url,
-                message_id = msg_id, 
-                ani_id = ani_id,
-                check_keyword = False,
-                to_reply = to_reply,
-                is_incoming = True)
+
+        print("final") 
+        sms_obj = InOutSms.objects.create(
+            gateway = signalwire_obj,
+            type='fax',
+            admin_id = admin_id, 
+            dnis = dnis, 
+            gif_url = fax,
+            message_id = msg_id, 
+            ani_id = ani_id,
+            check_keyword = False,
+            to_reply = to_reply,
+            is_incoming = True)
 
         if not check_duplicate:
             sms_obj.is_lead = True

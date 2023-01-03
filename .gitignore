@@ -1,6 +1,6 @@
 # Django #
 *.env
-*.client.txt
+client.txt
 *.log
 *.sqlite3
 *.pot

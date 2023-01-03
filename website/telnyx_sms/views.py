@@ -18,6 +18,7 @@ from responder.models import(
 
 @csrf_exempt
 def telnyx_fax_incoming_view(request):
+	print(f"telnyx incoming")
 	status = ""	
 	body = json.loads(request.body)
 	print(body)
@@ -31,20 +32,23 @@ def telnyx_fax_incoming_view(request):
 		ani = body["data"]["payload"]["from"]
 
 		ani_objs = Ani.objects.filter(ani__contains=ani.strip())
-		ani_id = ani_objs[0].id
+		ani_id = ani_objs.first().id
 		
-		if not status == "delivered":
-			if body['data']['payload']['errors']:
-				error = ""
-				code = ""
-				try:
-					error = body['data']['payload']['errors'][0]['title']
-					code = body['data']['payload']['errors'][0]['code']
-				except:
-					pass
+		if status == "failed":
+			try:
+				if body['data']['payload']['failure_reason']:
+					error = ""
+					code = ""
+					try:
+						error = body['data']['payload']['failure_reason']
+					except:
+						pass
 
-				InOutSms.objects.filter(message_id__contains = msg_id).update(
-					error = error, code = code, del_status = status)
+					InOutSms.objects.filter(message_id__contains = msg_id).update(
+						error = error, del_status = "undelivered")
+			except Exception as e:
+				print(e)
+			return HttpResponse(status=200)
 
 		elif status == "delivered":
 			try:
@@ -57,45 +61,51 @@ def telnyx_fax_incoming_view(request):
 					view = "telnyx_incoming_view", 
 					reason = 'anything'
 				)
+			return HttpResponse(status=200)
 			
 	if body['data']['payload']['direction'] == "inbound":
 		
-		message= body["data"]["payload"]["text"]
-		msg_id = body["data"]["id"]
-		ani = body["data"]["payload"]["to"][0]["phone_number"][1:]
-		dnis = body["data"]["payload"]["from"]["phone_number"]
+		msg_id = body["data"]["payload"]["fax_id"]
+		ani = body["data"]["payload"]["to"]
+		print("incoming ani", ani)
+		dnis = body["data"]["payload"]["from"]
 
 		# to deactivate drip response
 		new_dnis = dnis.replace("+","")
-		fb_objs = FacebookLead.objects.filter(phone__contains=new_dnis)
-		if fb_objs:
-			fb_objs.update(to_reply=False)
-		else:
-			if new_dnis[0] == "1":
-				fb_objs = FacebookLead.objects.filter(phone__contains=new_dnis[1:])
-				if fb_objs:
-					fb_objs.update(to_reply=False)
 
 		try:
-			gif_url = body["data"]["payload"]["media"][0]["url"]
-		except:
-			gif_url = ''
-
-		if 'stop' in message.lower():
-			FacebookLead.objects.filter(phone__contains=dnis).delete()
+			gif_url = body["data"]["payload"]["media_url"]
+		except Exception as e:
+			print(e)
+			gif_url = None
 
 		ani_objs = Ani.objects.filter(ani__contains=ani.strip())
-		ani_id = ani_objs[0].id
-		admin_id = ani_objs[0].admin_id
+
+		if ani_objs.exists():
+			ani_id = ani_objs.first().id
+			admin_id = ani_objs.first().admin_id
+		else:
+			return HttpResponse(status=404)
+		
+		# if the fax is already received
+		received_fax = InOutSms.objects.filter(message_id=msg_id, ani_id=ani_id)
+		if received_fax.exists():
+			fax = received_fax.first()
+			fax.gif_url = gif_url
+			fax.save()
+
+			return HttpResponse(status=200)
 
 		# check whether new lead
 		new_dnis = dnis.strip().replace('+', '')
-		sms_objs = InOutSms.objects.filter(ani_id=ani_id,dnis__contains=new_dnis)
+		sms_objs = InOutSms.objects.filter(ani_id=ani_id, dnis__contains=new_dnis)
+
 		if sms_objs.exists():
 			check_duplicate = True
 		else:
 			if new_dnis[0] == "1":
 				sms_objs = InOutSms.objects.filter(ani_id=ani_id,dnis__contains=new_dnis[1:])
+
 				if sms_objs.exists():
 					check_duplicate = True
 				else:
@@ -110,13 +120,12 @@ def telnyx_fax_incoming_view(request):
 			to_reply = False
 		else:
 			to_reply = True
-			
+		
 		sms_obj = InOutSms.objects.create(
 			gateway = telnyx_obj,
 			type='fax',
 			admin_id = admin_id, 
 			dnis = dnis, 
-			reply = message, 
 			gif_url = gif_url, 
 			message_id = msg_id, 
 			ani_id = ani_id,
@@ -136,6 +145,7 @@ def telnyx_fax_incoming_view(request):
 				is_wait = True,
 				has_incoming = True
 			)
+		print(("done"))
 					
 	return HttpResponse(status=200)
 
