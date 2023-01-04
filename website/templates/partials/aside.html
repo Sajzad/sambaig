@@ -44,33 +44,6 @@
       </div>
     </div>   
     <!-- facebook modal -->
-    <div id="facebook-list" class="modal fade" role="dialog">
-      <div class="modal-dialog">
-        <!-- Modal content-->
-        <div class="modal-content card px-5 py-4">
-            <div class="modal-header text-center">
-                <h5 class="modal-title sweet-text font-weight-bold letter-spacing text-uppercase">Add List</h5>
-            </div>
-            <div class="modal-body text-dark">
-                <form method="POST" action="{% url 'facebook:fb_ads' %}">
-                {% csrf_token %}
-                    <div class="form-group">
-                        <label>Form Id </label>
-                        <input type="text" placeholder="Form Id" name="form_id" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Form Name</label>
-                        <input type="text" placeholder="Form Name" name="form_name" class="form-control" required>
-                    </div>
-                    <div class="float-right">
-                        <button id="close-modal" type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
-                        <button type="submit" name="check" value="create-fb-form" class="btn btn-sm btn-default">Create</button>
-                    </div>
-                </form>
-          </div>
-        </div>
-      </div>
-    </div>
     <aside class="aside hidden" id="aside">
         <!-- Sidebar -->
         <div class="sidebar hidden text-oswald m-0 p-0">

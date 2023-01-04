@@ -4,8 +4,6 @@ from responder.models import (
     AssignedAni, 
     InOutSms)
 
-from facebook.models import AdForm
-
 
 def notifications(request):
     default_message = ""
@@ -25,10 +23,6 @@ def notifications(request):
         else:
             user_anis = AssignedAni.objects.filter(admin__admin=request.user)
 
-    except:
-        pass
-    try:
-        lead_list = AdForm.objects.all()
     except:
         pass
 
