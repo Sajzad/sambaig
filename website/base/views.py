@@ -1,36 +1,28 @@
 import os, re, random, json, datetime
 from datetime import timedelta, date
-from django.utils import timezone
 
-import psutil
 import re
-import socket
 from datetime import timedelta, datetime, date
 import csv
 import string
 
-from smtplib import SMTPException
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import ValidationError
 from allauth.account.views import SignupView, LoginView
-from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 
 from django.conf import settings
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
 from django.contrib import messages
-from django.core.mail import EmailMessage
 from django.core.validators import validate_email
 from django.contrib.auth import authenticate, login
-from django.template.loader import render_to_string
-from django.core.mail import EmailMessage
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, Q
 from django.contrib.auth.models import User as U
-# from django.utils.translation import ugettext as _
 from django.utils.translation import gettext_lazy as _
 
 
@@ -46,12 +38,10 @@ from responder.models import (
         InOutSms,
         UserPassword,
         PrimaryNumber,
-        Css
     )
 from .models import (
         Messenger,
         Support,
-        Contact,
         Chat,
         ShortenedUrl
     )
@@ -1181,7 +1171,6 @@ def edit_admin_view(request, admin_id):
 
     user = ""
     admins = Admin.objects.all()
-    contacts = AdForm.objects.all()
     assigned_contacts = AssignContact.objects.filter(admin_id=admin_id)
     if assigned_contacts:
         user = assigned_contacts[0]
@@ -1205,7 +1194,7 @@ def edit_admin_view(request, admin_id):
     context = {
         'assigned_contacts': assigned_contacts,
         'admin': user,
-        'contacts': contacts,
+        'contacts': None,
         'admins': admins
     }
     return render(request, 'base/edit-manage-user.html', context)
@@ -1318,7 +1307,7 @@ def home_view(request):
             reply__isnull = False,
             timestamp__date__contains = time_now).count()
 
-        today_lead = FacebookLead.objects.filter(timestamp__date__contains=time_now).count()
+        today_lead = 0
         delivered = sms_objs.filter(del_status = "delivered").count()
         undelivered = sms_objs.filter(del_status = "undelivered").count() 
     except Exception as e:
