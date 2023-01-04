@@ -19,8 +19,6 @@ from django.contrib.sites.models import Site
 from django.conf import settings
 
 from .models import *
-from facebook.models import *
-
 from base.models import CronTest
 
 

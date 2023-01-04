@@ -6,10 +6,6 @@ from django.views.decorators.csrf import csrf_exempt
 
 from responder.tasker import error_handler
 
-
-from facebook.models import (
-	FacebookLead)
-
 from responder.models import(
 	InOutSms,
 	Ani,

@@ -6,11 +6,6 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.db.models import Q
-
-from facebook.models import(
-	AdForm,
-	FacebookLead
-)
                                 
 
 User = get_user_model()
@@ -143,7 +138,6 @@ class Ani(models.Model):
 class BulkSms(models.Model):
 	name = models.CharField(max_length=100, null=True)
 	ani = models.ForeignKey(Ani, on_delete=models.CASCADE, null=True, blank=True)
-	contact = models.ForeignKey(AdForm, on_delete=models.CASCADE)
 	image = models.ForeignKey(Image, on_delete=models.SET_NULL, null=True)
 	gif_url = models.CharField(max_length=250, null=True, blank=True)
 	message = models.TextField()
@@ -180,7 +174,6 @@ class Autoresponse(models.Model):
 	response = models.TextField()
 	image = models.ForeignKey(Image, on_delete=models.SET_NULL ,blank=True, null=True)
 	gif_url = models.CharField(max_length=250, null=True)
-	contact = models.ForeignKey(AdForm, on_delete=models.CASCADE, null=True)
 	delay_days = models.IntegerField(default=0)
 	delay_mins = models.IntegerField(default=0)
 	delay_hours = models.IntegerField(default=0)
@@ -226,10 +219,9 @@ class AssignContact(models.Model):
 		Asignment of a single list ot multiple user
 	"""
 	admin = models.ForeignKey(Admin, on_delete=models.CASCADE, null=True)
-	contact = models.ForeignKey(AdForm, related_name='assign_contact', on_delete=models.CASCADE)
 
 	def __str__(self):
-		return self.contact.form_name
+		return self.admin
 
 choices = (
 	('fax','fax'),
@@ -238,7 +230,6 @@ choices = (
 
 class InOutSms(models.Model):
 	admin = models.ForeignKey(Admin, on_delete=models.CASCADE,blank=True, null=True, default=None)
-	contact = models.ForeignKey(AdForm, on_delete=models.SET_NULL, blank=True, null=True, default=None)
 	autoresponse = models.ForeignKey(Autoresponse, on_delete=models.SET_NULL, null=True, blank=True)
 	bulk_sms = models.ForeignKey(BulkSms, on_delete=models.SET_NULL, null=True, blank=True)
 	gateway = models.ForeignKey(Gateway, on_delete=models.SET_NULL, blank=True, null=True, default=None)
@@ -399,7 +390,6 @@ class Dlr(models.Model):
 class LogicResponse(models.Model):
 	admin = models.ForeignKey(Admin, on_delete=models.CASCADE,blank=True, null=True)
 	ani = models.ForeignKey(Ani, on_delete=models.CASCADE, blank=True, null=True)
-	contact = models.ForeignKey(AdForm, on_delete=models.CASCADE, default=None)
 	image = models.ForeignKey(Image, on_delete=models.SET_NULL, null=True)
 	keywords = models.TextField()
 	reply = models.TextField()
@@ -423,7 +413,6 @@ class CronJob(models.Model):
 
 class NumberUpload(models.Model):
 	admin = models.ForeignKey(Admin, on_delete=models.CASCADE)
-	contact = models.ForeignKey(AdForm, on_delete=models.CASCADE)
 	schedule = models.DateTimeField(null=True, blank=True)
 	thread = models.IntegerField()
 	message = models.TextField(null=True)

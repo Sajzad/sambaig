@@ -10,7 +10,6 @@ urlpatterns = [
     path('campaigns/', include('responder.urls')),
     path('telnyx/', include('telnyx_sms.urls')),
     path('signalwire/', include('SignalWire.urls')),
-    path('facebook/', include('facebook.urls')),
     path('accounts/', include('allauth.urls')),
 ]
 

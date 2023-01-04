@@ -55,10 +55,8 @@ from .models import (
         Chat,
         ShortenedUrl
     )
-from facebook.models import AdForm, FacebookLead
 
 User = get_user_model()
-
 
 
 def visit_real_url(request, short_url):

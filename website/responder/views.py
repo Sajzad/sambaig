@@ -20,13 +20,9 @@ from django.contrib.sites.models import Site
 
 from .models import *
 
-from facebook.models import(
-	AdForm,
-	FacebookLead
-)
 from .serializers import *
 
-User= get_user_model()
+User = get_user_model()
 
 
 @login_required

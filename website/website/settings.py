@@ -29,7 +29,6 @@ INSTALLED_APPS = [
     'responder',
     'telnyx_sms',
     'twilio_sms',
-    'facebook',
     'SignalWire'
 ]
 

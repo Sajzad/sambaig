@@ -6,7 +6,6 @@ from .models import(
 	BulkSms,
 	QuickResponseTitle
 )
-from facebook.models import FacebookLead, AdForm
 
 
 class InOutSmsSerializer(serializers.ModelSerializer):
@@ -56,16 +55,3 @@ class QuickResponseTitleSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 		extra_fields = ['responses']
 		# depth = 1
-
-class FacebookLeadSerializer(serializers.ModelSerializer):
-	responses = QuickResponseSerializer(many=True, read_only=True)
-	class Meta:
-		model = FacebookLead
-		fields = '__all__'
-		depth = 1
-
-class AdFormSerializer(serializers.ModelSerializer):
-	responses = QuickResponseSerializer(many=True, read_only=True)
-	class Meta:
-		model = AdForm
-		fields = '__all__'
