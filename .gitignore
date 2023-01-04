@@ -1,11 +1,13 @@
 # Django #
 *.env
 client.txt
+debug.log
 *.log
 *.sqlite3
 *.pot
 *.pyc
 __pycache__
+logs
 *.md
 db.sqlite3
 media
