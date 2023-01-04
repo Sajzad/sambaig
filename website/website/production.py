@@ -9,7 +9,7 @@ DEBUG = True
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 
-ALLOWED_HOSTS = [".squarereach.com", "squarereach.com", "66.29.143.190", "127.0.0.1"]
+ALLOWED_HOSTS = [".faxsmart.net", "faxsmart.net", "67.223.117.189", "127.0.0.1"]
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
