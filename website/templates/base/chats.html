@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Chats {% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-xl-4 offset-xl-1 card shadow p-3">
+                    <h3 class="pl-2 letter-spacing title-gradient animate__animated animate__slideInRight">
+                        <i class="fas fa-sms mr-3 ml-2 text-primary"></i><span class="">Chat Room</span></h3>
+                </div>
+                <div class="col-xl-7">
+                    <ol class="breadcrumb float-sm-right h6">
+                        <li class="breadcrumb-item"><a href="{% url 'base:home' %}">Home</a></li>
+                        <li class="breadcrumb-item text-warning">Chat Room</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-8 offset-xl-2" style="overflow-y: scroll;font-size:14px; font-weight: 500; height: 600px;">
+                    {% for item in chats %}
+                        {% if item.sent %}
+                            <div class="p-0 px-3 py-2 bg-default ml-5 card rounded border">
+                                <p class="p-0 m-0">{{ item.sent }}</p>
+                                <div class="p-0 m-0">
+                                    <p class="float-right m-0 p-0 text-secondary" style="font-size: 10px;">{{ item.timestamp }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if item.received %}
+                            <div class="p-0 px-3 py-2 bg-dark mr-5 card rounded">
+                                <p class="p-0 m-0 text-white">{{ item.received }}</p>
+                                <div class="p-0 m-0">
+                                    <p class="float-right m-0 p-0 text-white" style="font-size: 10px;">{{ item.timestamp }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <form method="POST" class="">
+            {% csrf_token %}
+                <div class="row pt-4">
+                    <div class="col-xl-5 offset-xl-3">
+                        {% if request.user.is_superuser or request.user.is_staff %}
+                            <div class="form-group">
+                                <textarea name="sent" placeholder="Type anything" class="form-control rounded-pill" rows="2"></textarea>
+                            </div>
+                        {% else %}
+                            <div class="form-group">
+                                <textarea name="received" placeholder="Type anything" class="form-control rounded-pill" rows="2"></textarea>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if request.user.is_superuser or request.user.is_staff %}
+                        <div class="col-xl-3">
+                            <input type="hidden" name="user" value="{{ user }}">
+                            <button name="check" value="send" type="submit" class="text-spacing btn btn-primary ml-3 px-4 py-2 mb-2">Reply</button>
+                            <button name="check" value="create" class="btn btn-warning ml-3 px-4 py-2 mb-2">create</button>
+                        </div>
+                    {% else %}
+                        <div class="col-xl-3">
+                            <input type="hidden" name="user" value="{{ user }}">
+                            <button name="check" value="received" type="submit" class="text-spacing btn btn-primary ml-3 px-4 py-2 mb-2">Send</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+    <section class="content" id="app">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xl-10 offset-xl-1 animate__animated animate__fadeInUp">
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+<script type="text/javascript" src="{% static 'vue/conversation.js' %}"></script>
+{% endblock %}

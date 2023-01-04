@@ -1,0 +1,8 @@
+<form method="post" action="http://127.0.0.1:8000/campaigns/pineapple/incoming">
+	{% csrf_token %}
+	<input type="text" name="dnis" placeholder="ani">
+	<input type="text" name="ani", placeholder="dnis">
+	<input type="text" name="message_id">
+	<input type="text" name="message">
+	<input type="submit" class="btn btn-submit" name="submit">
+</form>

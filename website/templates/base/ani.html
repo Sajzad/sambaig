@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}SMS Gateways{% endblock %}
+{% load static %}
+{% block content %}
+<div class="content-wrapper" id="app">
+    <!-- Content Header (Page header) -->
+    <div class="modal fade" id="create-ani">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content card px-lg-5 py-lg-2 p-1">
+                <div class="modal-header">
+                    <p class="h4 sweet-text bold-2">Create Number</p>
+                </div>
+                <div class="modal-body">
+                    <div class="">
+                        <form method="POST">
+                        {% csrf_token %}
+                            <div class="form-group">
+                                <label>Name *</label>
+                                <input placeholder="Give a name" type="text" name="name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Number *</label>
+                                <input placeholder="Type Telnyx number e.g. +8801856302154" type="tel" name="phone" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Select Gateway *</label>
+                                <select name="gateway_id" class="form-control" required>
+                                    {% for item in gateways %}
+                                        <option value="{{item.id}}">{{item.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="float-right pt-2">
+                                <button type="submit" class="btn btn-danger btn-sm bold-1" data-dismiss='modal'>Close</button>
+                                <button type="submit" class="btn btn-primary btn-sm bold-1" name='check' value="create-ani">Create</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="content-header">
+        <div class="container-fluid pt-3">
+            <div class="row">
+                <div class="col-md-2">
+                    <div>
+                        {% include 'base/ad-partial.html' %}
+                    </div>                      
+                </div>
+                <div class="col-md-10 mx-auto">
+                    <div class="card px-5 py-4">
+                        <table class="table">
+                            <div>
+                                <button data-target='#create-ani' data-toggle='modal' class="btn btn-primary btn-sm bold-1">+ Add Number</button>
+                                <button @click='removeAni()' class="btn btn-danger bold-1 btn-sm">Remove</button>
+                            </div>
+                            <thead>
+                                <tr>
+                                    <th>
+                                    </th>
+                                    <th>Name</th>
+                                    <th>Number</th>
+                                    <th>Assigned To</th>
+                                    <th>Status</th>
+                                    <th>Aciton</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in anis %}
+                                    <tr>
+                                        <td>
+                                            <input class="form-group" type="checkbox" v-model="ani_ids" value="{{item.id}}">
+                                        </td>
+                                        <td>{{item.name}}</td>
+                                        <td>{{item.ani}}</td>
+                                        <td>
+                                            {% if item.assigned_anis %}
+                                                {% for admin in item.assigned_anis %}
+                                                    <span class="badge badge-secondary">{{admin.admin}}</span>
+                                                {% endfor %}
+                                            {% else %}
+                                                <span class="bold-1">Not Assigned</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-success">Active</span>
+                                        </td>
+                                        <td>
+                                            <a class="text-primary" href="{{item.id}}/{{item.admin_id}}/">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+</div>
+{% endblock %}
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script type="text/javascript" src="{% static 'vue/main.js' %}"></script>
+    <script type="text/javascript" src="{% static 'vue/ani.js' %}"></script>
+
+    <script type="text/javascript">
+        document.getElementById("check-all").addEventListener("click", function(){
+            let check_boxes = document.getElementsByName("ani_id")
+            for (let i=0; i<check_boxes.length; i++){
+                if (check_boxes[i].checked){
+                    check_boxes[i].checked = false
+                }else{
+                    check_boxes[i].checked = true;
+                }
+            }
+        })
+    </script>
+    <script type="text/javascript">
+        $('select').selectpicker();
+    </script>
+{% endblock %}

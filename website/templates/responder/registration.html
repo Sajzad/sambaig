@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="content-wrapper" style="height: 100vh">
+    <div class="container">
+        <div class="row pt-5">
+            <div class="col-lg-7 offset-lg-2">
+                <div class="card p-5 text-center">
+                    <p class="h5"> Your Account is not activated. Please contact Support. </p>
+                    <p class="h6 pt-2">Back to home</p>
+                    <a href="{% url 'base:home' %}">Click here</a>
+                </div>  
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

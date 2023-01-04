@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Edit Manage User {% endblock %}
+{% block content %}
+	<div class="content-wrapper" id="app">
+		<section class="content">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-5 card mx-auto">
+				      	<div class="modal-header">
+				        	<h4 class="modal-title bold-2 sweet-text"> Edit Manage User</h4>
+				      	</div>
+				        <form method="post">
+			            {% csrf_token %}
+					      	<div class="card-body">
+								<div class="form-group">
+									<label>Username *</label>
+			                        <select class="form-control" name='admin_id' data-size='6' class="selectpicker"  data-actions-box="true" data-live-search="true" name="form_ids">
+			                           <option 
+			                           	selected 
+			                           	class="text-secondary" 
+			                           	value="{{ admin.admin_id }}">{{ admin.admin}}</option>
+
+			                        </select>
+			                    </div>
+			                    <div class="form-group">
+			                    	<label>List *</label>
+			                        <select class="form-control" multiple name='contact_id' data-size='6' class="selectpicker" data-actions-box="true" data-live-search="true" name="form_ids">
+			                        	{% for item in assigned_contacts %}
+			                        		<option selected class="text-secondary" value="{{ item.contact_id }}">{{ item.contact}}</option>
+			                        	{% endfor %}
+			                            {% for item in contacts %}
+			                                <option class="text-secondary" value="{{ item.id }}">{{ item.form_name}}</option>
+			                            {% endfor %}
+			                        </select>
+			                    </div>
+			                    <div class="float-right">
+						        	<button name="check" value="edit_manage_user" type="submit" class="btn btn-success bold-1">Update</button>
+						    	</div>		            
+					      	</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+	$(function () {
+    $('select').selectpicker();
+});
+</script>
+{% endblock %}

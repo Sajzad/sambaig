@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Role For Subadmin{% endblock %}
+
+{% block content %}
+<div id="lead-upload" class="modal fade bg-dark" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title sweet-text text-center letter-spacing">Lead Upload</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+               <label for="usr">Confirmation Text:</label>
+               <input placeholder="Type 'Confirm'" type="text" class="form-control" id="delete">
+            </div>            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button @click.prevent="deleteAllSms()" type="button" class="btn btn-danger" data-dismiss="modal">Confirm</button>
+          </div>
+        </div>
+    </div>
+</div>
+<div class="content-wrapper">
+    {% if request.user.is_superuser or request.user.is_staff %}
+        <div class="content-header">
+            <div class="row">
+                <div class="col-lg-2">
+                    <div>
+                        {% include 'base/ad-partial.html' %}
+                    </div>
+                </div>
+                <div class="col-lg-10">
+                    <div class="card px-2 py-3">
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <form method="POST" class="form-inline">
+                                    {% csrf_token %}
+                                    <div class="form-group pl-3">
+                                        <select name="day" class="form-control text-default">
+                                            <option value="1">Yesterday</option>
+                                            <option value="7">Last 7 Days</option>
+                                            <option value="30">Last 30 Days</option>
+                                        </select>
+                                    </div>
+                                    <button name="check" value="lead_check" class="btn btn-sm btn-default ml-2 px-3">GO</button>
+
+                                </form>
+                            </div>
+                            <div class="col-lg-4">
+                                <form method="post">
+                                {% csrf_token %}
+                                    <div class="form-group d-flex justify-content-between">
+                                        <input placeholder="Enter User" name="user" type="text" class="form-control">
+                                        <button class="btn btn-default ml-2 text-oswald" name="check" value="search"><i class="fas fa-search"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-lg-4 offset-lg-1">
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <button class="btn btn-sm btn-danger" name="check" value="full_csv">Download CSV</button>
+                                    <button class="btn btn-sm btn-default" name="check" value="full_txt">Download TXT</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            {% if pages %}
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>User</th>
+                                            <th>Campaign</th>
+                                            <td>Lead</th>
+                                            <td>action</th>
+                                            <td>Lead Upload</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in pages %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td class="text-primary">{{ item.admin }}</td>
+                                                <td>{{ item.campaign }}</td>
+                                                <td>{{ item.lead_count }}</td>
+                                                <td class="row">
+                                                    <form method="POST">
+                                                    {% csrf_token %}
+                                                        <input type="hidden" name="cam_id" value="{{ item.id }}">
+                                                        <button name="check" value="csv" class="badge badge-danger">Download csv</button>
+                                                        <button name="check" value="txt" class="badge badge-danger">Download Txt</button>
+                                                    </form>
+                                                </td>
+                                                <td style="width:40%">
+                                                    <form method="POST" class="form-inline" enctype="multipart/form-data">
+                                                    {% csrf_token %}
+                                                        <input type="file" name="lead" style="width: 70%;">
+                                                        <input type="hidden" name="cam_id" value="{{ item.id }}">
+                                                        <input type="hidden" name="admin_id" value="{{ item.admin_id }}">
+                                                        <button type="submit" name="check" value="upload" class="btn text-warning ml-2"><i class="fad fa-plus"></i></button>
+                                                        <!-- delete lead file -->
+                                                        <button type="submit" name="check" value="delete" class="btn text-danger ml-2"><i class="fad fa-trash-alt"></i></button>
+
+                                                        {% if item.file %}
+                                                            <div class="radio ml-2">
+                                                                <input type="radio" name="optradio" checked>
+                                                            </div>
+                                                        {% else %}
+                                                            <div class="radio ml-2">
+                                                                <input type="radio" name="optradio">
+                                                            </div>
+                                                        {% endif %}
+                                                    </form>
+                                                    
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% else %}
+                                <div class="card-footer">
+                                    <p class="text-center h6 text-secondary">No matches found !!</p>
+                                </div>
+                            {% endif %}
+
+                        </div>
+                        {% if pages.has_other_pages %}
+                            <div class="mt-5">
+                                <section class="article-pagination">
+                                  <div class="container">
+                                    <div class="row">
+                                      <div class="col-md-12">
+                                        <nav aria-label="Page navigation example">
+                                          <ul class="pagination justify-content-center">
+                                            {% if pages.has_previous %}
+                                              <li class="page-item pr-2">
+                                                <a class="" href="?page={{ pages.previous_page_number }}" tabindex="-1">
+                                                  <i class="text-secondary fas fa-chevron-circle-left fa-3x"></i>
+                                                </a>
+                                              </li>
+                                            {% endif %}
+                                            {% for page in pages.paginator.page_range %}
+                                              {% if pages.number == page %}     
+                                                <!-- Current page -->
+                                                <li class="page-item mt-1">
+                                                  <a class="page-link bg-danger h6" href="?page={{ page }}">{{ page }}</a>
+                                                </li>
+                                                <!-- end -->
+                                              {% elif page > pages.number|add:'-3' and page < pages.number|add:'3' %}
+                                                  <li class="page-item mx-2 mt-1">
+                                                    <a class="page-link h6" href="?page={{ page }}">{{ page }}</a>
+                                                  </li>
+                                              {% endif %}
+                                            {% endfor %}
+                                            {% if pages.has_next %}
+                                              <li class="page-item pl-2 text-danger">
+                                                <a class="" href="?page={{ pages.next_page_number }}">
+                                                  <i class="text-secondary fas fa-chevron-circle-right fa-3x"></i>
+                                                </a>
+                                              </li>
+                                            {% endif %}
+                                          </ul>
+                                        </nav>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </section>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    {% if alert %}
+        const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'success',
+                title: '{{ alert }}'
+
+            })
+    {% elif error %}
+        const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'error',
+                title: '{{ error }}'
+
+            })
+    {% endif %}
+</script>
+{% endblock %}

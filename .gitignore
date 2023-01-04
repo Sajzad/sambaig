@@ -22,7 +22,8 @@ media/image
 *$py.class 
 
 # Distribution / packaging 
-.Python build/ 
+.Python build/
+logs/
 develop-eggs/ 
 downloads/ 
 eggs/ 

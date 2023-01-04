@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Sub Admin{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+	{% if is_subadmin or request.user.is_superuser %}
+	    <div class="content-header">
+	        <div class="container-fluid">
+
+	            <div class="row mb-2">
+                    <div class="col-lg-6">
+                        {% include 'subadmin/ad-partial.html' %}
+                    </div>
+	                <div class="col-lg-6">
+	                    <ol class="breadcrumb float-sm-right">
+							<!-- <li class="mx-2"><a class="btn btn-outline-secondary" href="{% url 'responder:packages' %}"> Packages</a></li> -->
+	                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+	                        <li class="breadcrumb-item"> Sub Admin</li>
+	                    </ol>
+	                </div>
+                </div>
+	        </div>
+	    </div>
+	{% else %}
+		 <div class="content-header pt-5">
+	        <div class="container-fluid">
+	            <div class="row mb-2">
+	                <div class="col-lg-6 offset-lg-2">
+	                	<div class="shadow p-4 mb-4 bg-white text-center">
+	                		<h4 >Please Contact Admin for permission</h4>
+                            <p class="text-primary pt-3 h6">
+                                <a href="{% url 'base:home' %}">Back to home</a>
+                            </p>
+	                	</div>
+	                </div>
+	            </div>
+			</div>
+		</div> 
+	{% endif %}   
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    {% if alert %}
+        const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'success',
+                title: '{{ alert }}'
+
+            })
+    {% elif error %}
+        const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'error',
+                title: '{{ error }}'
+
+            })
+    {% endif %}
+
+</script>
+{% endblock %}
+{% endblock %}
