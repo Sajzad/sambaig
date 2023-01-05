@@ -178,8 +178,6 @@ var app = new Vue({
         }else{
             alert('please select List.')
         }
-        
-
     },
     getList(){
         let data = {

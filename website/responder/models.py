@@ -307,15 +307,6 @@ class InOutSms(models.Model):
 			return None
 
 	@property
-	def name(self):
-		fb_objs = FacebookLead.objects.filter(phone__contains=self.dnis.strip())
-		if fb_objs:
-			name = fb_objs[0].full_name
-		else:
-			name = ''
-		return name
-
-	@property
 	def latest_timestamp(self):
 		if self.is_lead:
 			return InOutSms.objects.filter(dnis__contains=self.dnis.replace("+",""))\

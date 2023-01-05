@@ -1056,6 +1056,7 @@ def side_conversations_view(request):
 		if request.method == 'POST':
 			if request.FILES:
 				check = request.POST.get("check")
+
 				if check == "upload_image":
 					image = request.FILES.get("image")
 
@@ -1094,60 +1095,6 @@ def side_conversations_view(request):
 					json_data = {}
 
 					return JsonResponse(json_data, status=200)
-
-				elif check == 'update_list':
-
-					first_name = data.get('contact').get("first_name", "")
-					last_name = data.get('contact').get("last_name", "")
-					email = data.get('contact').get("email", "")
-					lead_id = data.get("contact").get("id")
-
-					if not lead_id:
-						dnis = data.get("dnis")
-						lead_id = FacebookLead.objects.create(
-								first_name = first_name,
-								last_name = last_name,
-								phone = dnis,
-								full_name = '{} {}'.format(first_name, last_name),
-								email = email
-							).id
-
-					contact_id = data.get("list").get("id")
-
-					FacebookLead.objects.filter(id=lead_id).update(
-							first_name = first_name,
-							last_name = last_name,
-							full_name = '{} {}'.format(first_name, last_name),
-							email = email,
-							contact_id = contact_id,
-						)
-					data = {
-						'success': True
-					}
-					return JsonResponse(data=data, status=200)
-
-				elif check == 'get_list':
-					dnis = data.get('dnis')
-					lists = ''
-
-					if request.user.is_superuser:
-						lists = AdForm.objects.all()
-						lists_serializer = AdFormSerializer(instance=lists, many=True)
-
-					contacts = FacebookLead.objects.filter(phone__contains=dnis)
-
-					contact = ''
-					if contacts:
-						contact = contacts[0]
-						contact_serializer = FacebookLeadSerializer(instance=contact)
-						contact = contact_serializer.data
-					
-					data = {
-						'contact': contact,
-						'lists': lists_serializer.data
-					}
-					return JsonResponse(data=data, status=200)
-
 				elif check == "delete_response":
 
 					resp_id = data.get("resp_id")
@@ -1190,22 +1137,6 @@ def side_conversations_view(request):
 					else:
 						return JsonResponse(data=None, status=400)
 
-				elif check == "switch_autoresponse":
-
-					dnis = data.get("dnis")
-					manual = data.get("is_manual")
-					if not manual:
-						manual = True
-					else:
-						manual = False
-
-					FacebookLead.objects.filter(phone__contains=dnis.replace("+", "")).update(is_active=manual)
-
-					json_data = {
-						"is_manual": manual
-					}
-					return JsonResponse(json_data, status=200)
-
 				elif check == "leads":
 					first = data['first']
 					second = data['second']
@@ -1215,7 +1146,7 @@ def side_conversations_view(request):
 					total_lead = 0
 					
 					if request.user.is_superuser:
-						# print('total_lead')
+						print('total_lead')
 						pn = PrimaryNumber.objects.all()
 						if pn:
 							ani_id = pn[0].ani_id
@@ -1254,10 +1185,14 @@ def side_conversations_view(request):
 								lead_objs = lead_objs[first:second]
 
 					if lead_objs:
-						serializer = InOutSmsSerializer(instance=lead_objs, many=True)
-						leads = serializer.data
+						try:
+							serializer = InOutSmsSerializer(instance=lead_objs, many=True)
+							leads = serializer.data
+						except Exception as e:
+							print(e)
 					else:
-						leads = None							
+						leads = None
+
 					json_data = {
 						"leads":leads,
 						"total_lead": total_lead,
@@ -1268,7 +1203,7 @@ def side_conversations_view(request):
 				elif check == "search_dnis":
 					leads = ''
 					dnis = data['dnis']
-					print(dnis)
+
 					if request.user.is_superuser:
 						pn = PrimaryNumber.objects.all()
 						if pn:
@@ -1280,6 +1215,7 @@ def side_conversations_view(request):
 						
 					else:
 						ani_id = Ani.objects.filter(admin__admin=request.user)[0].id
+						
 						if len(dnis)>1:
 							leads_obj = InOutSms.objects.filter(ani_id=ani_id, \
 							is_lead=True, dnis__contains=dnis)
@@ -1294,22 +1230,6 @@ def side_conversations_view(request):
 					json_data = {
 						"leads":leads
 					}
-					return JsonResponse(data = json_data, status=200)
-
-				elif check == "remove_dnis":
-					dnis = data['dnis']
-
-					FacebookLead.objects.filter(phone__contains=dnis.replace("+", "")).delete()
-					if request.user.is_superuser:
-						InOutSms.objects.filter(dnis__contains=dnis.replace("+","")).delete()
-					else:
-						InOutSms.objects.filter(
-							admin__admin = request.user, 
-							dnis = dnis.strip()).delete()
-
-					json_data = {
-					}
-					
 					return JsonResponse(data = json_data, status=200)
 
 				elif check == "send_note":
@@ -1388,7 +1308,7 @@ def side_conversations_view(request):
 						if image_id or gif_url:
 							is_mms = True
 						else:
-							is_mms = False
+							return JsonResponse(data = None, status=406)
 
 						auth = AddGateway.objects.filter(id=gateway_id).values()[0]
 
@@ -1463,12 +1383,12 @@ def side_conversations_view(request):
 					ani_id = ani_objs[0].id
 					gateway_id = ani_objs[0].gateway_id
 					gateway = ani_objs[0].gateway.gateway.gateway
-					print('GATEWAY', gateway)
 					admin_id = ani_objs[0].admin_id
+
 					if image_id:
 						is_mms = True
 					else:
-						is_mms = False
+						return JsonResponse(data = None, status=406)
 
 					if scheduled_at:
 						InOutSms.objects.create(
@@ -1484,9 +1404,9 @@ def side_conversations_view(request):
 							message_id = msg_id)
 					else:
 						auth = AddGateway.objects.filter(id=gateway_id).values()[0]
-						print("yesss")
 						urls = []
 						is_mms = True
+
 						if image_id:
 							url = Image.objects.filter(id=image_id)[0].image.url
 							site = Site.objects.all()[0].domain
@@ -1494,7 +1414,7 @@ def side_conversations_view(request):
 							urls.append(url)
 						if gif_url:
 							urls.append(gif_url)
-						print("yes 3")
+
 						fax_id, error, code, status = send_fax(auth, gateway, ani, dnis, message, urls)		
 						
 						is_lead = InOutSms.objects.filter(ani_id=ani_id, dnis__contains=dnis.replace("+","")).exists()
@@ -1577,11 +1497,6 @@ def chat_details(request, dnis):
 		ani = data.get('ani')
 		# print(data)
 		if check == "chat_details":
-			fb_objs = FacebookLead.objects.filter(phone__contains=dnis.replace("+",""))
-			if fb_objs:
-				is_manual = fb_objs[0].is_active
-			else:
-				is_manual=False
 			if request.user.is_superuser:
 				chats = InOutSms.objects.filter(
 					ani__ani__contains=ani.replace('+', ""),
@@ -1609,7 +1524,7 @@ def chat_details(request, dnis):
 			"dnis":dnis,
 			"name": name,
 			"ani":ani,
-			"is_manual": is_manual
+			"is_manual": True
 		}
 		return JsonResponse(json_context, status=200)
 

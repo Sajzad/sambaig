@@ -4,7 +4,7 @@ from .models import *
 # Register your models here.
 
 class InOutSmsAdmin(admin.ModelAdmin):
-    list_display = ['ani', 'name', 'type', 'gateway', 'error', 'message_id', 'reply', 'sent', 'dnis','del_status',\
+    list_display = ['ani', 'type', 'gateway', 'error', 'message_id', 'reply', 'sent', 'dnis','del_status',\
     'is_lead', 'check_keyword', 'to_reply','is_wait','is_bulk']
     search_fields = ['dnis', 'sent', 'reply', 'ani__ani']
 

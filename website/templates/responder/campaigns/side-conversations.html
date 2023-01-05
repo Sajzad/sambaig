@@ -7,7 +7,7 @@
 {% block content %}
 <div id="app" class="">
     <!-- template modal -->
-    <div class="modal fade text-left pt-5" id="template-modal">
+    {% comment %} <div class="modal fade text-left pt-5" id="template-modal">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-body">
@@ -93,7 +93,7 @@
                 </div>
             </div>
         </div>
-    </div> 
+    </div>  {% endcomment %}
      <!-- edit group title -->
     <div class="modal fade pt-3" id="edit-title">
         <div class="modal-dialog">
@@ -304,7 +304,7 @@
         </div>
     </div>
     <!-- update user modal -->
-    <div class="modal fade" id="user-modal">
+    {% comment %} <div class="modal fade" id="user-modal">
         <div class="modal-dialog text-dark">
             <div class="modal-content card">
                 <div class="modal-header">
@@ -347,7 +347,7 @@
             </div>
         </div>
         
-    </div>
+    </div> {% endcomment %}
     <section class="content px-lg-3 p-0 m-0">
         <div class="row radius inbox-page-height" id="chat-container">
             <div class="col-md-3 leads bg-offwhite border-right" id="aside">
@@ -384,12 +384,7 @@
                         <div 
                             class="pl-lg-4 pl-1 d-flex justify-content-between animate__animated animate__lightSpeedInLeft">
                             <h2>
-                                <span
-                                    v-if='item.name.length>1' 
-                                    class="text-dark bold-1" >
-                                    <i class="fad fa-inbox-in mr-2"></i>[[ item.name ]]</span>
                                 <span 
-                                    v-else
                                     class="text-dark bold-1">
                                     <i class="fad fa-inbox-in mr-2"></i>[[ item.dnis|phone_number ]]</span>
                             </h2>
@@ -669,7 +664,7 @@
                         <button @click='enableNewMsgInput()' class="btn btn-default bold-2">New Conversation</button>
                     </div>
                 </div>
-                <div v-if='isEmoji' class="emoji border-1 pl-3">
+                {% comment %} <div v-if='isEmoji' class="emoji border-1 pl-3">
                     <div class="d-flex justify-content-between">
                         <p class="bold-1">&#x1F603; Find your favourite Emoiji</p>
                         <p @click="closeEmoji()" class="pointer"><i class="fas fa-times"></i></p>
@@ -687,7 +682,7 @@
                             style = "font-size:20px" 
                             class = "mx-1 pointer"> [[item.character]] </span>
                     </div>
-                </div>
+                </div> {% endcomment %}
                 <div class="row mx-lg-3 mx-1 mt-2" v-if="chats.length>0 || newMsgInput">
                     <div class="col-md-12 mb-0 pb-0">
                         <span 

@@ -38,7 +38,6 @@ def get_dnis(dnis):
 	return dnis
 
 def send_fax(auth, gateway, ani, dnis, message, urls):
-	print('fax data', ani, dnis)
 	try:
 		error = None
 		code = None
@@ -46,41 +45,44 @@ def send_fax(auth, gateway, ani, dnis, message, urls):
 		status = None
 
 		if "telnyx" in gateway.lower():
-			TELNYX_FAX_URL = "https://api.telnyx.com/v2/faxes"
-			TELNYX_API_KEY = auth['tel_api'].strip()
-		
-			headers = {
-				'Authorization': f"Bearer {TELNYX_API_KEY}"
-			}
+			try:
+				TELNYX_FAX_URL = "https://api.telnyx.com/v2/faxes"
+				TELNYX_API_KEY = auth['tel_api'].strip()
+			
+				headers = {
+					'Authorization': f"Bearer {TELNYX_API_KEY}"
+				}
 
-			data = {
-				"media_url": urls[0],
-				"connection_id": os.getenv("TELNYX_CONNECTION_ID"),
-				"to": dnis,
-				"from": ani,
-			}
+				data = {
+					"media_url": urls[0],
+					"connection_id": os.getenv("TELNYX_CONNECTION_ID"),
+					"to": dnis,
+					"from": ani,
+				}
 
-			res = requests.post('https://api.telnyx.com/v2/faxes', headers=headers, data=data)
+				res = requests.post('https://api.telnyx.com/v2/faxes', headers=headers, data=data)
 
-			print('telnyx response',res.status_code, res.text)
-			fax_id = res.json()['data']['id']
-			print('fax_id', fax_id)
-			if fax_id:
-				code = 200
-				status = "pending"
+				fax_id = res.json()['data']['id']
+				
+				if fax_id:
+					code = 200
+					status = "pending"
+			except Exception as e:
+				print(e)
 
 		elif "signalwire" in gateway.lower():
-			print('fax is sending')
-			print('url', urls)
-			client = signalwire_client(
-				os.getenv("SIGNALWIRE_PROJECT_ID"),
-				os.getenv("SIGNALWIRE_TOKEN"),
-				signalwire_space_url = os.getenv("SIGNALWIRE_SPACE_URL"))
+			try:
+				client = signalwire_client(
+					os.getenv("SIGNALWIRE_PROJECT_ID"),
+					os.getenv("SIGNALWIRE_TOKEN"),
+					signalwire_space_url = os.getenv("SIGNALWIRE_SPACE_URL"))
 
-			fax = client.fax.faxes.create(
-				from_=ani,
-				to=dnis,
-				media_url=urls[0])
+				fax = client.fax.faxes.create(
+					from_=ani,
+					to=dnis,
+					media_url=urls[0])
+			except Exception as e:
+				print(e)
 			
 			print('fax response',fax.sid)
 	except Exception as err:

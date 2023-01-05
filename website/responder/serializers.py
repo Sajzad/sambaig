@@ -10,15 +10,15 @@ from .models import(
 
 class InOutSmsSerializer(serializers.ModelSerializer):
 	latest_sms = serializers.CharField()
-	name = serializers.CharField()
 	admin_name = serializers.CharField()
 	latest_timestamp = serializers.DateTimeField()
 	is_replied = serializers.BooleanField()
 	is_liked = serializers.BooleanField()
 	total_like = serializers.IntegerField()
+	
 	class Meta:
 		model = InOutSms
-		fields = ('dnis','ani', 'id', 'error', 'image','sent', 'reply', 'note', 'latest_sms', 'name', \
+		fields = ('dnis','ani', 'id', 'error', 'image','sent', 'reply', 'note', 'latest_sms', \
 			'admin_name', 'timestamp', 'is_scheduled', 'scheduled_at', 'del_status', 'latest_timestamp',\
 			'is_seen', 'is_replied','gif_url','is_incoming','is_manual', 'is_liked', 'total_like',\
 			'is_bulk')
