@@ -1,4 +1,5 @@
-import os, re, random, json, datetime
+import logging
+import os,json
 from datetime import timedelta
 from django.utils import timezone
 from time import sleep
@@ -24,6 +25,8 @@ from .serializers import *
 
 User = get_user_model()
 
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def pn_view(request):
@@ -1384,7 +1387,7 @@ def side_conversations_view(request):
 
 				elif check == "manual_text":
 					print("Manual text")
-
+					logger.info("loggin")
 					ani = data.get("ani")
 					dnis = data["dnis"]
 					message = data["message"]

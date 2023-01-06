@@ -20,6 +20,10 @@ from django.conf import settings
 
 from .models import *
 from base.models import CronTest
+import logging
+
+
+logger = logging.getLogger("error_logger")
 
 
 def error_handler(error, view, reason):
@@ -68,7 +72,7 @@ def send_fax(auth, gateway, ani, dnis, message, urls):
 					code = 200
 					status = "pending"
 			except Exception as e:
-				print(e)
+				logger.error(str(e))
 
 		elif "signalwire" in gateway.lower():
 			try:
@@ -81,12 +85,13 @@ def send_fax(auth, gateway, ani, dnis, message, urls):
 					from_=ani,
 					to=dnis,
 					media_url=urls[0])
+				fax_id = fax.sid
 			except Exception as e:
 				print(e)
-			
-			print('fax response',fax.sid)
+				logger.error(str(e))
 	except Exception as err:
 		print('fax sender error: ', traceback.format_exc())
+		logger.error(str(e))
 	return fax_id, error, code, status
 
 def send_sms(auth, gateway, ani, dnis, message):

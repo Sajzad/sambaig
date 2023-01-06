@@ -97,34 +97,74 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 MEDIA_URL = "/media/"
 
-# Loggers
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': '{}/logs/debug.log'.format(BASE_DIR),
-            'formatter': 'simpleRe',
-        }
-
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG'
-        }
-
-    },
-    'formatters': {
-        'simpleRe': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        }
-    }
-
+	'version':1,
+	'disable_existing_loggers': False,
+	'formatters':{
+		'large':{
+			'format':"{levelname} {asctime} {pathname} {funcName} Line: {lineno} {message}",
+            'style': "{"
+		},
+		'tiny':{
+			'format':'%(asctime)s  %(message)s  '
+		}
+	},
+	'handlers':{
+		'errors_file':{
+			'level':'ERROR',
+		       'class':'logging.handlers.TimedRotatingFileHandler',
+			'filename':'logs/ErrorLoggers.log',
+			'formatter':'large',
+		},
+		'info_file':{
+			'level':'INFO',
+		       'class':'logging.handlers.TimedRotatingFileHandler',
+			'filename':'logs/InfoLoggers.log',
+			'formatter':'large',
+		},
+	},
+	'loggers':{
+		'error_logger':{
+			'handlers':['errors_file'],
+			'level':'WARNING',
+			'propagate':False,
+		},
+		'info_logger':{
+			'handlers':['info_file'],
+			'level':'INFO',
+			'propagate':False,
+		},
+	},
 }
+
+# Loggers
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'file': {
+#             'level': 'ERROR',
+#             'class': 'logging.handlers.WatchedFileHandler',
+#             'filename': '{}/logs/debug.log'.format(BASE_DIR),
+#             'formatter': 'simpleRe',
+#         }
+
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['file'],
+#             'level': 'ERROR',
+#         }
+
+#     },
+#     'formatters': {
+#         'simpleRe': {
+#             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+#             'style': '{',
+#         }
+#     }
+
+# }
 
 # Allauth
 AUTHENTICATION_BACKENDS = [
