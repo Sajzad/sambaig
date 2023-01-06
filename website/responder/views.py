@@ -1054,6 +1054,7 @@ def side_conversations_view(request):
 			return JsonResponse(json_data, status=200)
 
 		if request.method == 'POST':
+
 			if request.FILES:
 				check = request.POST.get("check")
 
@@ -1096,7 +1097,6 @@ def side_conversations_view(request):
 
 					return JsonResponse(json_data, status=200)
 				elif check == "delete_response":
-
 					resp_id = data.get("resp_id")
 					QuickResponse.objects.filter(id=resp_id).delete()
 
@@ -1232,6 +1232,21 @@ def side_conversations_view(request):
 					}
 					return JsonResponse(data = json_data, status=200)
 
+				elif check == "remove_dnis":
+					dnis = data['dnis']
+
+					if request.user.is_superuser:
+						InOutSms.objects.filter(dnis__contains=dnis.replace("+","")).delete()
+					else:
+						InOutSms.objects.filter(
+							admin__admin = request.user, 
+							dnis = dnis.strip()).delete()
+
+					json_data = {
+					}
+					
+					return JsonResponse(data = json_data, status=200)
+
 				elif check == "send_note":
 					error = ""
 					ani = data.get("ani")
@@ -1275,8 +1290,6 @@ def side_conversations_view(request):
 
 				elif check == "new_message":
 					print("new message")
-					# print(data)
-
 					error = ""
 					dnis = data.get("new_number")
 

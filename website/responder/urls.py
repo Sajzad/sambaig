@@ -5,7 +5,6 @@ from . import views
 app_name = "responder"
 
 urlpatterns = [
-    
     path('undelivered', views.undel_messages_view, name='undelivered-messages'),
     path('gallery/<int:cam_id>/', views.gallery_view, name='gallery'),
     path('cronjob/', views.cronjob_view, name='cronjob'),
@@ -26,5 +25,4 @@ urlpatterns = [
     path('keywords/<int:keyword_id>/', views.edit_keyword_view, name='edit_keyword'),
     path('bulk-sms/', views.import_view, name='bulk-sms'),
     path('primary-number/', views.pn_view, name='primary_number'),
-
 ]

@@ -104,16 +104,6 @@ var app = new Vue({
         elem.scrollTop = elem.scrollHeight;
     }
   },
-    
-  //   watch:{
-  //   message: function(){
-  //       if(this.message.length>0){
-  //           document.getElementById("send-message").disabled=false;
-  //       }else{
-  //          document.getElementById("send-message").disabled=true; 
-  //       }
-  //   }
-  // },
 
   filters: {
     phone_number: function(input){
