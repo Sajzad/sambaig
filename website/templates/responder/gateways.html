@@ -78,6 +78,10 @@
 	                                        <label for="usr">API KEY:</label>
 	                                        <input type="text" class="form-control" id="usr" name="api_key">
 	                                    </div>
+										<div class="form-group">
+	                                        <label for="usr">CONNECTION ID:</label>
+	                                        <input type="text" class="form-control" id="usr" name="connection_id">
+	                                    </div>
 	                                    <div class="text-center pt-2">
                                     		<button type="submit" class="btn-hover color-11" name="check" value="telnyx">Submit</button>
                                     	</div>
@@ -182,9 +186,9 @@
 	                                                Delete
 	                                            </button>
 	                                        </form>
-	                                        <a 
+	                                        {% comment %} <a 
 	                                        	href="/gateway/{{item.id}}" 
-	                                        	class="btn btn-success btn-sm">edit</a>
+	                                        	class="btn btn-success btn-sm">edit</a> {% endcomment %}
 	                                    </td>
 	                                </tr>
 	                            {% endfor %}
@@ -235,16 +239,16 @@
 	            					<p class="text-secondary h6 ml-2">Inbound Url</p>
 	            					<p class="text-secondary ml-4">{{ site.domain }}/telnyx/incoming</p>
 	            					<p class="text-secondary h6 ml-2">DLR Url</p>
-	            					<p class="text-secondary ml-4">{{ site.domain }}/telnyx/dlr</p>
+	            					<p class="text-secondary ml-4">Not required</p>
 		            			</div>
             				</div>
             			</div>
             			<div class="col-lg-5">
             				<div class="card">
 		            			<div class="card-body">
-	            					<p class="h4 mb-3 border-bottom pb-2 bold-2">Zapier Webhook Url</p>
+	            					<p class="h4 mb-3 border-bottom pb-2 bold-2">Signalwire Webhook Url</p>
 	            					<p class="text-secondary h6 ml-2">Inbound Url</p>
-	            					<p class="text-secondary ml-4">{{ site.domain }}/facebook/incoming</p>
+	            					<p class="text-secondary ml-4">{{ site.domain }}/signalwire/incoming</p>
 	            					<p class="text-secondary h6 ml-2">DLR Url</p>
 	            					<p class="text-secondary ml-4">Not required</p>
 		            			</div>

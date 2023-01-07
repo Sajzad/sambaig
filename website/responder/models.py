@@ -109,6 +109,7 @@ class AddGateway(models.Model):
 	sid = models.CharField(max_length=150, null=True, blank=True)
 	token = models.CharField(max_length=150, null=True, blank=True)
 	tel_api = models.CharField(max_length=150, null=True, blank=True)
+	tel_connection_id = models.CharField(max_length=150, null=True, blank=True)
 	vonage_api_key = models.CharField(max_length=150, null=True, blank=True)
 	vonage_api_secret = models.CharField(max_length=150, null=True, blank=True)
 	signal_api_token = models.CharField(max_length=150, null=True, blank=True)

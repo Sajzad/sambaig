@@ -50,8 +50,10 @@ def send_fax(auth, gateway, ani, dnis, message, urls):
 
 		if "telnyx" in gateway.lower():
 			try:
-				TELNYX_FAX_URL = "https://api.telnyx.com/v2/faxes"
+				print('tel', auth)
 				TELNYX_API_KEY = auth['tel_api'].strip()
+				CONNECTION_ID = auth['connection_id'].strip()
+				print('conne',CONNECTION_ID)
 			
 				headers = {
 					'Authorization': f"Bearer {TELNYX_API_KEY}"
@@ -59,7 +61,7 @@ def send_fax(auth, gateway, ani, dnis, message, urls):
 
 				data = {
 					"media_url": urls[0],
-					"connection_id": os.getenv("TELNYX_CONNECTION_ID"),
+					"connection_id": CONNECTION_ID,
 					"to": dnis,
 					"from": ani,
 				}
@@ -76,10 +78,13 @@ def send_fax(auth, gateway, ani, dnis, message, urls):
 
 		elif "signalwire" in gateway.lower():
 			try:
+				p_id = auth['signal_project_id']
+				s_url = auth['signal_space_url']
+				token = auth['signal_api_token']
 				client = signalwire_client(
-					os.getenv("SIGNALWIRE_PROJECT_ID"),
-					os.getenv("SIGNALWIRE_TOKEN"),
-					signalwire_space_url = os.getenv("SIGNALWIRE_SPACE_URL"))
+					p_id,
+					token,
+					signalwire_space_url = s_url)
 
 				fax = client.fax.faxes.create(
 					from_=ani,

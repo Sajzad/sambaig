@@ -1387,7 +1387,7 @@ def side_conversations_view(request):
 
 				elif check == "manual_text":
 					print("Manual text")
-					logger.info("loggin")
+					
 					ani = data.get("ani")
 					dnis = data["dnis"]
 					message = data["message"]

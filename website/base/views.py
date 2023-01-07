@@ -1385,52 +1385,19 @@ def gateway_view(request):
             except Exception as e:
                 print(e)
 
-            if check == "pineapple":
-                user = request.POST['user']
-                password = request.POST['password']
-                AddGateway.objects.create(
-                    name = name,
-                    admin=admin_obj, 
-                    gateway=gat_obj, 
-                    user=user, 
-                    password=password)
-                alert = "Added Succesfully"
-            elif check == "twilio":
-                sid = request.POST['sid']
-                token = request.POST['token']
-                AddGateway.objects.create(
-                    name = name, 
-                    admin = admin_obj, 
-                    gateway = gat_obj, 
-                    sid = sid, 
-                    token = token)
-                alert = "Added Succesfully"
-                
-            elif check=='telnyx':
+            if check=='telnyx':
                 try:
                     api_key = request.POST['api_key']
+                    conn_id = request.POST['connection_id']
                     AddGateway.objects.create(
                         name = name, 
                         admin = admin_obj, 
-                        gateway = gat_obj, 
+                        gateway = gat_obj,
+                        tel_connection_id = conn_id,
                         tel_api = api_key)
                     alert = "Added Succesfully"
                 except Exception as e:
                     print(e)     
-
-            elif check=='vonage':
-                api_key = request.POST['vonage_api_key']
-                secret_key = request.POST['vonage_secret_key']
-                try:
-                    AddGateway.objects.create(
-                        admin = admin_obj, 
-                        name = name,
-                        gateway = gat_obj, 
-                        vonage_api_key = api_key, 
-                        vonage_api_secret = secret_key)
-                except Exception as e:
-                    print(e)
-                alert = "Added Succesfully"
 
             elif check == "signalwire":
                 api_token = request.POST['signal_api_token']
@@ -1441,12 +1408,6 @@ def gateway_view(request):
                     signal_project_id=project_id.strip())
                 alert = "Added Succesfully"
 
-            elif check == "plivo":
-                plivo_id = request.POST.get("plivo_id")
-                plivo_token = request.POST.get("plivo_token")
-                AddGateway.objects.create(admin=admin_obj, gateway=gat_obj, name=name,\
-                    plivo_token=plivo_token.strip(), plivo_id=plivo_id.strip())
-                alert = "Added Succesfully"
             elif check == "delete":
                 gat_id = request.POST['gat_id'].strip()
                 try:
@@ -1454,10 +1415,6 @@ def gateway_view(request):
                     alert = "Deleted Succesfully"
                 except Exception as e:
                     print(e)
-            elif check == "p-delete":
-                gat_id = request.POST['gat_id']
-                PineappleAuth.objects.get(id=gat_id).delete()
-
         else:
             error = "Gateway Error"
 
