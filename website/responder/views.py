@@ -1078,6 +1078,80 @@ def side_conversations_view(request):
 					}
 					return JsonResponse(json_data, status=200)
 
+				elif check == 'manual_mms':
+					data = request.POST
+					ani = data.get("ani")
+					dnis = data["dnis"]
+					image_id = data.get("mms")
+					image = request.FILES.get("image")
+
+					if image:
+						admin_obj = get_object_or_404(Admin, admin__username=request.user)
+						image_id = Image.objects.count()
+						name = 'image_{}'.format(image_id)
+						image = Image.objects.create(
+							admin = admin_obj, 
+							name = name, 
+							image=image)
+
+						image_id = image.id
+
+					ani_objs = Ani.objects.filter(ani=ani.strip())
+					ani_id = ani_objs[0].id
+					gateway_id = ani_objs[0].gateway_id
+					gateway = ani_objs[0].gateway.gateway.gateway
+					admin_id = ani_objs[0].admin_id
+
+					if image_id:
+						is_mms = True
+					else:
+						return JsonResponse(data = None, status=406)
+
+					auth = AddGateway.objects.filter(id=gateway_id).values()[0]
+					urls = []
+					is_mms = True
+
+					if image_id:
+						url = Image.objects.filter(id=image_id)[0].image.url
+						site = Site.objects.all()[0].domain
+						url = site + url
+						urls.append(url)
+
+					fax_id, error, code, status = send_fax(auth, gateway, ani, dnis, urls)		
+					
+					is_lead = InOutSms.objects.filter(ani_id=ani_id, dnis__contains=dnis.replace("+","")).exists()
+						
+					if is_lead:
+						is_lead = False
+					else:
+						is_lead = True
+
+					sms_obj = InOutSms.objects.create(
+						admin_id=admin_id,
+						image_id=image_id,
+						is_mms=is_mms, 
+						ani_id=ani_id, 
+						dnis=dnis, 
+						del_status=status,
+						is_lead=is_lead,
+						type='fax',
+						message_id=fax_id)
+					
+					if error:
+						sms_obj.error = error
+						sms_obj.code = code
+						sms_obj.del_status = "undelivered"
+						sms_obj.save()
+
+					chats = ''
+					ani = ''
+					json_context = {
+						"chats":chats,
+						"ani":ani,
+						"dnis":dnis,
+					}
+					return JsonResponse(data = json_context, status=200)
+
 			else:
 				data = json.loads(request.body)
 				check = data['check']
@@ -1319,13 +1393,16 @@ def side_conversations_view(request):
 						else:
 							ani_objs = Ani.objects.filter(admin__admin=request.user)
 					else:
-						ani_objs = AssignedAni.objects.filter(admin__admin=request.user)
-						
+						assigned_anis = AssignedAni.objects.filter(admin__admin=request.user)
+						if assigned_anis.exists():
+							ani_objs = Ani.objects.filter(id=assigned_anis.first().ani_id)
+
 					if ani_objs:
-						ani_id = ani_objs[0].ani.id
-						ani = ani_objs[0].ani.ani
-						gateway_id = ani_objs[0].ani.gateway_id
-						gateway = ani_objs[0].ani.gateway.gateway.gateway
+						ani_obj = ani_objs.first()
+						ani_id = ani_obj.id
+						ani = ani_obj.ani
+						gateway_id = ani_obj.gateway_id
+						gateway = ani_obj.gateway.gateway.gateway
 
 						admin_id = get_object_or_404(Admin, admin=request.user).id
 
@@ -1394,14 +1471,10 @@ def side_conversations_view(request):
 					return JsonResponse(data = json_context, status=200)
 
 				elif check == "manual_text":
-					print("Manual text")
 					
 					ani = data.get("ani")
 					dnis = data["dnis"]
-					message = data["message"]
 					image_id = data.get("mms")
-					gif_url = data.get("gif_url")
-					scheduled_at = data["scheduled_at"]
 
 					ani_objs = Ani.objects.filter(ani=ani.strip())
 					ani_id = ani_objs[0].id
@@ -1414,64 +1487,48 @@ def side_conversations_view(request):
 					else:
 						return JsonResponse(data = None, status=406)
 
-					if scheduled_at:
-						InOutSms.objects.create(
-							admin_id = admin_id, 
-							ani_id = ani_id,
-							image_id = image_id,
-							gif_url = gif_url,
-							dnis = dnis, 
-							sent = message,
-							is_scheduled = True,
-							is_mms = is_mms,
-							scheduled_at = scheduled_at,
-							message_id = msg_id)
+					auth = AddGateway.objects.filter(id=gateway_id).values()[0]
+					urls = []
+					is_mms = True
+
+					if image_id:
+						url = Image.objects.filter(id=image_id)[0].image.url
+						site = Site.objects.all()[0].domain
+						url = site + url
+						urls.append(url)
+
+					fax_id, error, code, status = send_fax(auth, gateway, ani, dnis, urls)		
+					
+					is_lead = InOutSms.objects.filter(ani_id=ani_id, dnis__contains=dnis.replace("+","")).exists()
+						
+					if is_lead:
+						is_lead = False
 					else:
-						auth = AddGateway.objects.filter(id=gateway_id).values()[0]
-						urls = []
-						is_mms = True
+						is_lead = True
 
-						if image_id:
-							url = Image.objects.filter(id=image_id)[0].image.url
-							site = Site.objects.all()[0].domain
-							url = site + url
-							urls.append(url)
-						if gif_url:
-							urls.append(gif_url)
-
-						fax_id, error, code, status = send_fax(auth, gateway, ani, dnis, message, urls)		
-						
-						is_lead = InOutSms.objects.filter(ani_id=ani_id, dnis__contains=dnis.replace("+","")).exists()
-							
-						if is_lead:
-							is_lead = False
-						else:
-							is_lead = True
-
-						sms_obj = InOutSms.objects.create(
-							admin_id=admin_id,
-							image_id=image_id,
-							gif_url=gif_url,
-							is_mms=is_mms, 
-							ani_id=ani_id, 
-							dnis=dnis, 
-							sent=message,
-							del_status=status,
-							is_lead=is_lead,
-							type='fax',
-							message_id=fax_id)
-						
-						if error:
-							sms_obj.error = error
-							sms_obj.code = code
-							sms_obj.del_status = "undelivered"
-							sms_obj.save()
+					sms_obj = InOutSms.objects.create(
+						admin_id=admin_id,
+						image_id=image_id,
+						is_mms=is_mms, 
+						ani_id=ani_id, 
+						dnis=dnis, 
+						del_status=status,
+						is_lead=is_lead,
+						type='fax',
+						message_id=fax_id)
+					
+					if error:
+						sms_obj.error = error
+						sms_obj.code = code
+						sms_obj.del_status = "undelivered"
+						sms_obj.save()
 
 					chats = ''
 					ani = ''
 					json_context = {
 						"chats":chats,
 						"ani":ani,
+						"dnis":dnis
 					}
 					return JsonResponse(data = json_context, status=200)
 	try:

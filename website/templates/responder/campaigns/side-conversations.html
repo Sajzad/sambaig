@@ -259,39 +259,40 @@
             <div class="modal-content card">
                 <div class="modal-body">
                     <div class="animate__animated animate__fadeInDown">
-                        <h4 class="pt-3 pl-3 bold-2">Upload Documents</h4>
+                        <h4 class="pt-3 pl-3 bold-2 text-warning text-center">Upload Documents To Send Fax</h4>
                         <div class="card-body">
                             <form @submit.prevent='uploadImage()' class="form-group" method="POST" enctype="multipart/form-data">
                              {% csrf_token %}
                                 <div class="row mt-2">
-                                    <div class="col-md-8">
+                                    <div class="col-md-12 d-flex justify-content-center">
                                         <input multiple type="file" @change='handlingFile' placeholder="Upload File">
                                     </div>
-                                    <div class="col-md-4 pt-lg-0 pt-2">
+                                    {% comment %} <div class="col-md-4 pt-lg-0 pt-2">
                                         <button class="btn btn-primary bold-2">Upload</button>   
-                                    </div>
+                                    </div> {% endcomment %}
                                 </div>
                             </form>
                              <div class="my-4">
-                                <div class='d-flex justify-content-between'>
+                                <div class='pb-4 text-center h4 bold-3'>
+                                    <span class='text-warning'>OR Select from recent Uploads To Send Fax</span>
+                                </div>
+                                <div v-if='mms' class='d-flex justify-content-between'>
                                     <div>
-                                        <h5 class="bold-2 text-secondary">
+                                        <h5 class="bold-2">
                                             <button
                                                 id="deselect"
                                                 @click='selectMMS'
                                                 class="btn btn-danger btn-sm bold-1">deselect</button>
-                                            <span><i class="fas fa-images mr-2"></i></span>
-                                            Select from recent Uploads 
                                         </h5>
                                     </div>
                                     <div>
-                                        <button 
+                                        <button
                                             @click='removeImage()'
                                             class='btn btn-sm btn-danger bold-1'>delete</button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <div class="row pl-3" style='max-height:500px; overflow-y:scroll'>
                                 <div class="col-md-4 p-2 form-check" v-for='item in images'>
                                     <input v-model='mms' name="mms" :value="item.id" type="radio" class="form-check-input">
                                     <p class='h6' style='font-size:13px'>[[item.image|truncate(15)]]</p>
@@ -311,7 +312,21 @@
                             </div>
                         </div>
                         <div class="float-right">
-                            <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                            <form method="POST" enctype="multipart/form-data">
+                            {%csrf_token%}
+                                <button
+                                    type="button"
+                                    class="btn btn-danger btn-sm bold-1"
+                                    data-dismiss="modal">Cancel</button>
+                                <button
+                                    v-if='mms || image'
+                                    @click='sendMMS()'
+                                    type="button"
+                                    class="btn btn-primary btn-sm bold-1 ml-3"
+                                    data-dismiss="modal">
+                                    <i class="fal fa-share"></i> Send Fax
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -379,7 +394,7 @@
                             v-if='ani'
                             @click='enableNewMsgInput()' 
                             class="btn btn-info btn-sm mt-2 mx-2 bold-1">
-                            New</button>
+                            New Fax</button>
                     </div>
                     {% comment %} <div class="mt-2">
                         <select v-model='filter_type' @change='filterLeads()'>
@@ -454,7 +469,7 @@
                     <div v-if='newMsgInput' class="col-md-12 form-group pr-4 py-0 my-0">
                         <input 
                             v-model='newNumber' 
-                            placeholder="type number" 
+                            placeholder="type your fax number" 
                             type="tel" 
                             class="form-control">
                     </div>
@@ -678,8 +693,10 @@
                 </ul>
                 <div v-else class="d-flex align-items-center chat-page-height-2">
                     <div v-if='ani' class="text-center w-100">
-                        <h6 class="mb-3">&#x1F603; Please select a conversation or create new one</h6>
-                        <button @click='enableNewMsgInput()' class="btn btn-default bold-2">New Conversation</button>
+                        <h6 class="mb-3 bold-1">
+                            &#x1F603; Please select a number OR Create a new <span class='text-success bold-2 h5 pl-1'>FAX
+                        </h6>
+                        <button @click='enableNewMsgInput()' class="btn btn-default bold-2">New Fax</button>
                     </div>
                 </div>
                 {% comment %} <div v-if='isEmoji' class="emoji border-1 pl-3">
@@ -703,19 +720,19 @@
                 </div> {% endcomment %}
                 <div class="row mx-lg-3 mx-1 mt-2" v-if="chats!=null && chats.length>0 || newMsgInput">
                     <div class="col-md-12 mb-0 pb-0">
-                        <span 
+                        {% comment %} <span 
                             @click = "shiftToMsg()"
                             style="font-size:16px" 
                             :class = "{'shaded-color': isMsg}" 
                             class = "pb-0 mb-0 bold-2 pointer">Fax
-                        </span>
-                        <span
+                        </span> {% endcomment %}
+                        {% comment %} <span
                             @click = 'shiftToNote()'
                             v-if='!newMsgInput'
                             style="font-size:16px" 
                             :class = "{'shaded-color': isNote}" 
                             class = "pb-0 mb-0 bold-2 ml-2 pointer">Note
-                        </span>
+                        </span> {% endcomment %}
                         <span class="bold-1 ml-2 text-warning" v-if='scheduledAt'> SMS Scheduled to be at [[ formatDate(scheduledAt)]]</span>
                     </div>
                     <div class="col-lg-12 col-sm-12 mt-2">
@@ -732,7 +749,7 @@
                         </div>
                         <form method="post" class="form-group">
                         {% csrf_token %}
-                            <div class="form-group">
+                            {% comment %} <div class="form-group">
                                 <textarea 
                                     @keyup = 'autoHeight()' 
                                     id = "message-box"
@@ -742,8 +759,8 @@
                                     class = "form-control chat-textarea"
                                     ref = 'textarea' 
                                     placeholder = "Type message here" required></textarea>
-                            </div>
-                            <div class="d-flex justify-content-between">
+                            </div> {% endcomment %}
+                            <div class="d-flex justify-content-center">
                                 <div class="">
                                     <div v-if='!isNote'>
                                         {% comment %} <p 
@@ -764,18 +781,22 @@
                                             title="Find your favourite emoji" 
                                             style="font-size:25px"  
                                             class="pointer mx-2">&#x1F603;</span> {% endcomment %}
-                                        <span class='bold-3 text-info' style='font-size:17px'>Upload</span>
+                                        <span
+                                            data-target = '#media-modal'
+                                            data-toggle = 'modal'
+                                            class='bold-3 text-warning pointer'
+                                            style='font-size:20px'>Upload File</span>
                                         <i 
-                                            class = "fal fa-upload pointer ml-lg-2"
-                                            title="Upload Media File" 
+                                            class = "fal fa-upload pointer text-primary ml-lg-2"
+                                            title="Upload File" 
                                             style="font-size:25px" 
                                             data-target = '#media-modal' 
-                                            data-toggle = 'modal' 
+                                            data-toggle = 'modal'
                                             title="Upload Media file"></i>
-                                        <span v-if='mms' class="ml-2">
+                                        {% comment %} <span v-if='mms' class="ml-2">
                                             <strong class="text-primary">File selected:</strong>
                                             <!-- <span class="text-secondary">[[mms]]</span> -->
-                                        </span>
+                                        </span> {% endcomment %}
                                     </div>
                                     <div v-else class="pb-lg-5">
                                         
@@ -783,21 +804,21 @@
                                 </div>
                                 <div class="d-flex flex-row-reverse">
                                     <div class="">
-                                        <button 
+                                        {% comment %} <button 
                                             v-if='newMsgInput' 
                                             @click.prevent = 'sendNewMessage()' 
                                             name = "check" 
                                             type = "submit"
                                             class = "btn btn-primary btn-sm">Send New Fax
-                                        </button>
-                                        <button 
+                                        </button> {% endcomment %}
+                                        {% comment %} <button 
                                             v-if='isMsg && !scheduledAt' 
                                             @click.prevent = 'sendText()' 
                                             name = "check" 
                                             type = "submit"
                                             id="send-message"
                                             class = "btn btn-primary btn-sm">Send Fax
-                                        </button>
+                                        </button> {% endcomment %}
                                         {% comment %} <button 
                                             v-if='scheduledAt' 
                                             @click.prevent = 'sendText()' 
@@ -805,13 +826,13 @@
                                             type = "submit"
                                             class = "btn btn-primary btn-sm">Schedule Message
                                         </button> {% endcomment %}
-                                        <button 
+                                        {% comment %} <button 
                                             v-if='isNote' 
                                             @click.prevent = 'sendNote()' 
                                             name = "check" 
                                             type = "submit"
                                             class = "btn btn-primary btn-sm">Send Note
-                                        </button>
+                                        </button> {% endcomment %}
                                     </div>
                                     {% comment %} <div v-if='!isNote' class="mr-3">
                                         <i style="cursor:pointer;" class="fad fa-alarm-clock fa-2x ml-3" data-target='#schedule-modal' data-toggle='modal'  data-placement="top" title="Schedule message"></i>

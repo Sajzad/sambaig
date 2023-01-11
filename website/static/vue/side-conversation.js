@@ -739,6 +739,43 @@ var app = new Vue({
             alert("You have nothing to send.")
         }
     },
+    sendMMS(){
+        let dnis = null;
+        if (!this.newNumber && !this.dnis){
+            alert("Type or select your Fax number!")
+            return null
+        }
+        if (this.newNumber && !this.dnis){
+            var formData = new FormData();
+            formData.append('image', this.image);
+            formData.append('check', 'manual_mms');
+            formData.append('ani', this.ani);
+            formData.append('dnis', this.newNumber);
+        }else{
+            var formData = {
+                'mms': this.mms,
+                'check': 'manual_text',
+                'ani': this.ani,
+                'dnis': this.dnis,
+            }
+        }
+
+        let url = window.location.href;
+        let vm = this;
+        sendRequest(url, "post", formData)
+            .then(function(response){
+                // vm.ani = response.data.ani;
+                vm.image = null;
+                vm.mms = null;
+                vm.chatDetails(response.data.dnis);
+                vm.mms =  '';
+                vm.newNumber='';
+                var elem = document.getElementById('chat');
+                if (elem){
+                    elem.scrollTop = elem.scrollHeight;
+                }
+            })
+    },
 
     removeItem(dnis){
         console.log("yes")

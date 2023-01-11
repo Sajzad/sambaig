@@ -41,12 +41,24 @@ def get_dnis(dnis):
 
 	return dnis
 
-def send_fax(auth, gateway, ani, dnis, message, urls):
+def modified_ani(ani):
+    if ani:
+        ani = ani.strip()
+        ani = ani.replace('-', '')
+        if len(ani) == 10 and not ani.startswith("+1"):
+            ani = "+1" + ani
+        elif len(ani) == 11 and not ani.startswith("+1"):
+            ani = "+" + ani
+    return ani
+	
+def send_fax(auth, gateway, ani, dnis, urls):
 	try:
 		error = None
 		code = None
 		fax_id = None
 		status = None
+
+		ani = modified_ani(ani)
 
 		if "telnyx" in gateway.lower():
 			try:
