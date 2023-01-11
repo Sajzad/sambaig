@@ -116,7 +116,7 @@
 												<div class="col-md-5">
 													{% if request.user.is_superuser %}
 														<p class="text-bold">Access to Admin Panel</p>
-														<a href="/way_to_superadmin/base/notification/" class="badge badge-danger">user</a>
+														{% comment %} <a href="/way_to_superadmin/base/notification/" class="badge badge-danger">user</a> {% endcomment %}
 														<a href="/way_to_superadmin/sites/site/" class="badge badge-secondary">site</a>
 													{% endif %}
 												</div>
@@ -136,7 +136,7 @@
 												<div class="d-flex flex-row-reverse">
 													<button data-toggle='modal' data-target='#user-modal' type="button" class="btn-sm btn btn-secondary bold-1">+ create User</button>
 
-													<button data-toggle='modal' data-target='#manage-user-modal' type="button" class="btn-sm btn btn-secondary mr-2 bold-1">Assign List</button>
+													{% comment %} <button data-toggle='modal' data-target='#manage-user-modal' type="button" class="btn-sm btn btn-secondary mr-2 bold-1">Assign List</button> {% endcomment %}
 												</div>
 											</div>
 										</div>
@@ -146,9 +146,9 @@
 										<div class="card-body">
 											<div class="pb-1">
 												{% if request.user.is_superuser %}
-													<button class="btn btn-warning btn-sm bold-1" name="check" value="super">Admin</button>
+													{% comment %} <button class="btn btn-warning btn-sm bold-1" name="check" value="super">Admin</button> {% endcomment %}
 												{% endif %}
-												<button class="btn btn-warning btn-sm bold-1" name="check" value="user">User</button>
+												{% comment %} <button class="btn btn-warning btn-sm bold-1" name="check" value="user">User</button> {% endcomment %}
 												<button class="btn btn-danger btn-sm float-right" name="check" value="remove">Remove</button>
 											</div>
 											<div style="max-height: 400px!important; overflow-y:scroll;">
@@ -164,7 +164,6 @@
 															<th>User</th>
 															<!-- <th>Action</th> -->
 															<th>Number</th>
-															<th>List</th>
 															<th>Type</th>
 															<th>Action</th>
 														</tr>
@@ -183,7 +182,7 @@
 																<p>{{ani.ani}}</p>
 															{%endfor%}
 															</td>
-															<td>
+															{% comment %} <td>
 															{% for contact in item.contacts %}
 																<p class="badge badge-secondary px-2">{{contact.contact.form_name}}
 																<i 
@@ -191,7 +190,7 @@
 																	class="ml-2 fas fa-times pointer"></i>
 																</p>
 															{%endfor%}
-															</td>
+															</td> {% endcomment %}
 															<td class="text-primary">
 															{% if item.admin.is_superuser%}
 																<p class="badge badge-success">admin</p>

@@ -1,5 +1,7 @@
 # Django #
 *.env
+logging*.*
+logging.handlers.WatchedFileHandler
 client.txt
 debug.log
 *.log

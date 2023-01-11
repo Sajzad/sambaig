@@ -133,6 +133,7 @@ var app = new Vue({
     },
     truncate: function (text, length) {
         if(text){
+            text = text.replace("gallery/", "")
             if (text.length > length) {
                 return text.substring(0, length) + "...";
             } else {
@@ -533,12 +534,29 @@ var app = new Vue({
 
         sendRequest(url, 'post', formData)
         .then(function(response){
-            console.log(response.data.images);
+            console.log(response.data.images)
             vm.images = response.data.images;
-            this.mms = null;
-            this.image = e.target.files[0]
-            this.selectedGif = null;
+            vm.mms = null;
+            vm.selectedGif = null;
         })
+    },
+    removeImage(){
+        if (confirmed("Are you sure you want to delete this image?")){
+            var url = window.location.href;
+            var vm = this;
+            var data = {
+                check: 'remove_image',
+                mms:this.mms,
+            }
+            console.log(data)
+            sendRequest(url, 'post', data)
+            .then(function(response){
+                vm.images = response.data.images;
+                vm.mms = null;
+                vm.selectedGif = null;
+
+            })
+        }
     },
     sendNote(){
         if (confirmed("Are you sure you want to leave a note?")){

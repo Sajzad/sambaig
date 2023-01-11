@@ -928,10 +928,6 @@ def admin_view(request):
         except:
             pass      
         try:
-            contacts = AdForm.objects.all()
-        except:
-            pass    
-        try:
             admins = Admin.objects.filter(admin__is_superuser=False)
         except:
             pass
@@ -949,7 +945,6 @@ def admin_view(request):
             if check == "delete_all_sms":
                 try:
                     User.objects.exclude(username=request.user).delete()
-                    Campaign.objects.all().delete()
                     clear_media()
                     alert = "deleted"
                 except Exception as e:
@@ -1019,11 +1014,6 @@ def admin_view(request):
                 try:
                     if request.POST['admin'] == "yes":
                         superuser = True
-                except:
-                    pass
-                try:                
-                    if request.POST['subadmin'] == "yes":
-                        staff = True
                 except Exception as e:
                     print(e)
 
@@ -1031,11 +1021,12 @@ def admin_view(request):
                     # here subadmin is admin and admin is superadmin
                     User.objects.create_user(username=user, email=None, password=password)
                     user_obj = get_object_or_404(User, username=user)
-                    Admin.objects.create(admin=user_obj, is_permitted=True)
+                    try:
+                        Admin.objects.create(admin=user_obj, is_permitted=True)
+                    except Exception as e:
+                        print(e)
                     UserPassword.objects.create(user=user_obj, password = password)
-                    if staff:
-                        subadmin_obj = get_object_or_404(User, username = user)
-                        SubAdmin.objects.create(subadmin=subadmin_obj)
+
                     # permissoin for admin and subadmin
                     if superuser or staff:
                         is_admin = False
@@ -1095,7 +1086,6 @@ def admin_view(request):
                     error = "incorrect user or password!"
 
             elif check == "remove":
-                print(request.POST)
                 alert = "User can't be removed!"
                 names = request.POST.getlist("username")
 
@@ -1151,7 +1141,7 @@ def admin_view(request):
 
 
         context = {
-            "contacts": contacts,
+            "contacts": None,
             "admins": admins,
             "super_users":super_users,
             "form_error":f_error,
@@ -1201,6 +1191,7 @@ def edit_admin_view(request, admin_id):
 
 @login_required
 def home_view(request):
+    return redirect(reverse('responder:side-conversations'))
     total_lead = 0
     incoming_sms = 0
     sent_sms = 0

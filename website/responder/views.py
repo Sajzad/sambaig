@@ -1050,7 +1050,7 @@ def side_conversations_view(request):
 		pass
 	if request.is_ajax():
 		if request.method == 'GET':
-			images = list(Image.objects.values().order_by('-id'))[:6]
+			images = list(Image.objects.filter(admin__admin=request.user).values().order_by('-id'))
 			json_data = {
 				'images': images
 			}
@@ -1072,7 +1072,7 @@ def side_conversations_view(request):
 							admin = admin_obj, 
 							name = name, 
 							image=image)
-					images = list(Image.objects.values().order_by('-id')[:6])
+					images = list(Image.objects.filter(admin__admin=request.user).values().order_by('-id'))
 					json_data = {
 						"images": images
 					}
@@ -1088,6 +1088,15 @@ def side_conversations_view(request):
 					
 					json_data = {
 						'username':username
+					}
+					return JsonResponse(json_data, status=200)
+				
+				elif check == "remove_image":
+					image_id = data.get("mms")
+					Image.objects.filter(id=image_id).delete()
+					images = list(Image.objects.filter(admin__admin=request.user).values().order_by('-id'))
+					json_data = {
+						'images': images
 					}
 					return JsonResponse(json_data, status=200)
 
@@ -1149,7 +1158,6 @@ def side_conversations_view(request):
 					total_lead = 0
 					
 					if request.user.is_superuser:
-						print('total_lead')
 						pn = PrimaryNumber.objects.all()
 						if pn:
 							ani_id = pn[0].ani_id
@@ -1311,13 +1319,13 @@ def side_conversations_view(request):
 						else:
 							ani_objs = Ani.objects.filter(admin__admin=request.user)
 					else:
-						ani_objs = Ani.objects.filter(admin__admin=request.user)
-
+						ani_objs = AssignedAni.objects.filter(admin__admin=request.user)
+						
 					if ani_objs:
-						ani_id = ani_objs[0].id
-						ani = ani_objs[0].ani
-						gateway_id = ani_objs[0].gateway_id
-						gateway = ani_objs[0].gateway.gateway.gateway
+						ani_id = ani_objs[0].ani.id
+						ani = ani_objs[0].ani.ani
+						gateway_id = ani_objs[0].ani.gateway_id
+						gateway = ani_objs[0].ani.gateway.gateway.gateway
 
 						admin_id = get_object_or_404(Admin, admin=request.user).id
 

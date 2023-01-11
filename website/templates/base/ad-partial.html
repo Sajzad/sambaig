@@ -27,9 +27,9 @@
 			<li class="nav-item">
 				<a class="nav-link ml-lg-1 btn-hover color-8 letter-spacing" href="{% url 'base:super_admin' %}">User Panel</a>
 			</li>
-			<li class="nav-item">
+			{% comment %} <li class="nav-item">
 				<a class="nav-link ml-lg-1 btn-hover color-11 letter-spacing" href="{% url 'base:create-role' %}">Permission</a>
-			</li>
+			</li> {% endcomment %}
 			{% if request.user.is_superuser %}					
 				<li class="nav-item">
 					<a 

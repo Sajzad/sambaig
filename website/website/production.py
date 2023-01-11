@@ -5,7 +5,7 @@ from .settings import *
 
 INTERNAL_IP='127.0.0.1'
 
-DEBUG = True
+DEBUG = False
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 

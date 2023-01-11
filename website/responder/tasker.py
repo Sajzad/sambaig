@@ -91,6 +91,7 @@ def send_fax(auth, gateway, ani, dnis, message, urls):
 					to=dnis,
 					media_url=urls[0])
 				fax_id = fax.sid
+				status = 'delivered'
 			except Exception as e:
 				print(e)
 				logger.error(str(e))

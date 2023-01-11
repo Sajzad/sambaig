@@ -24,6 +24,7 @@ class InOutSmsSerializer(serializers.ModelSerializer):
 			'is_bulk')
 		depth = 1
 
+
 class AutoresponseSerializer(serializers.ModelSerializer):
 	total_sent = serializers.IntegerField()
 	total_delivered = serializers.IntegerField()
